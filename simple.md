@@ -54,12 +54,12 @@ based on the Ed25519 public keys of the two validators ($k_e, k \in \mathbb{K}$)
 reasonable timeout (e.g. 5 seconds), the other validator may choose to initiate the connection.
 Given two Ed25519 public keys $(a, b)$, the Preferred Initiator $P(a, b) \in \{a, b\}$ is given as:
 
-$$
+```math
 P(a, b) \equiv \begin{cases}
     a &\text{when } \text{bits}(a)_{255} \oplus \text{bits}(b)_{255} \oplus (a < b)\\
     b &\text{otherwise}
 \end{cases}
-$$
+```
 
 Validators should accept connections from other nodes too, with a reasonable number of slots (e.g.
 20) reserved for work-package builders. Builders may reasonably be required to prove their
@@ -404,9 +404,9 @@ correctness of the shards.
 
 The justification should be the co-path of the path from the erasure root to the shards, given by:
 
-$$
+```math
 T(\mathbf{s}, i, \mathcal{H})
-$$
+```
 
 Where:
 
@@ -480,9 +480,9 @@ correctness of the response.
 The justification for a segment shard should be the co-path from the erasure root to the shard,
 given by:
 
-$$
+```math
 \mathbf{j} \frown [b] \frown T(\mathbf{s}, i, \mathcal{H})
-$$
+```
 
 Where:
 
