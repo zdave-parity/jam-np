@@ -226,7 +226,7 @@ Merklization function.
 Header Hash = [u8; 32]
 Key = [u8; 31] (First 31 bytes of key only)
 Maximum Size = u32
-Boundary Node = As returned by $B$/$L$, defined in the State Merklization appendix of the GP
+Boundary Node = As returned by B/L, defined in the State Merklization appendix of the GP
 Value = len++[u8]
 
 Node -> Node
