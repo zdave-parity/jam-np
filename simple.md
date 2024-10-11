@@ -373,7 +373,7 @@ Guarantor -> Validator
 <-- FIN
 ```
 
-## CE 136: Work-report request
+### CE 136: Work-report request
 
 Request for the work-report with the given hash.
 
