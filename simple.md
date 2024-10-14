@@ -274,11 +274,11 @@ known with certainty, the stream should be reset/stopped. This applies to both p
 Epoch Index = u32 (Should identify the epoch that the ticket will be used in)
 Attempt = { 0, 1 } (Single byte)
 Bandersnatch RingVRF Proof = [u8; 784]
-Ticket = Epoch Index ++ Attempt ++ Bandersnatch RingVRF Proof
+Ticket = Attempt ++ Bandersnatch RingVRF Proof (As in GP)
 
 Validator -> Validator
 
---> Ticket
+--> Epoch Index ++ Ticket
 --> FIN
 <-- FIN
 ```
