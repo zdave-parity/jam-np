@@ -148,8 +148,8 @@ Announcement of a block may only be skipped if:
 - A descendant of the block is announced instead.
 - The block is not a descendant of the latest finalized block.
 
-The hash and slot of the latest finalized block should be included in the handshake message and
-also in every announcement message that is sent.
+The header hash and slot of the latest finalized block should be included in the handshake message
+and also in every announcement message that is sent.
 
 ```
 Header Hash = [u8; 32]
