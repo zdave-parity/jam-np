@@ -609,6 +609,11 @@ tranche, broadcast an announcement to all other such auditors specifying which w
 intend to audit, unless they do not intend to audit any work-reports, in which case no announcement
 should be sent.
 
+If an auditor determines, after the beginning of a tranche, additional work-reports that they
+should audit, they should broadcast additional announcements covering these work-reports. This
+situation can occur if an announcement for the previous tranche arrives late, and no corresponding
+judgment has been received.
+
 An announcement contains a list of work-reports as well as evidence backing up the announcer's
 decision to audit them. In combination with the block being audited and the prior state, the
 evidence should be sufficient for recipients of the announcement to verify the audit requirement
