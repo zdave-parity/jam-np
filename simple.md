@@ -285,7 +285,13 @@ Validator -> Validator
 
 ### CE 133: Work-package submission
 
-Submission of a work-package from a builder to a guarantor assigned to the relevant core.
+Submission of a work-package from a builder to a guarantor.
+
+The second message should contain all the extrinsic data referenced by the work-package, formatted
+as in work-package bundles, which are defined in the Computation of Work Results section of the GP.
+
+Note that the content of imported segments _should not_ be sent; it is the responsibility of the
+receiving guarantor to fetch this data from the availability system.
 
 ```
 Core Index = u16
