@@ -370,7 +370,7 @@ Work Report = As in GP
 Slot = u32
 Validator Index = u16
 Ed25519 Signature = [u8; 64]
-Guaranteed Work Report = Work Report ++ Slot ++ len++[Validator Index ++ Ed25519 Signature]
+Guaranteed Work Report = Work Report ++ Slot ++ len++[Validator Index ++ Ed25519 Signature] (As in GP)
 
 Guarantor -> Validator
 
