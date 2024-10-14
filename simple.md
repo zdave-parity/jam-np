@@ -614,6 +614,9 @@ should audit, they should broadcast additional announcements covering these work
 situation can occur if an announcement for the previous tranche arrives late, and no corresponding
 judgment has been received.
 
+An auditor should never announce intent to audit a particular work-report, in the context of a
+particular block, in more than one tranche.
+
 An announcement contains a list of work-reports as well as evidence backing up the announcer's
 decision to audit them. In combination with the block being audited and the prior state, the
 evidence should be sufficient for recipients of the announcement to verify the audit requirement
