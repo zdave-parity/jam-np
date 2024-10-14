@@ -617,8 +617,19 @@ judgment has been received.
 An announcement contains a list of work-reports as well as evidence backing up the announcer's
 decision to audit them. In combination with the block being audited and the prior state, the
 evidence should be sufficient for recipients of the announcement to verify the audit requirement
-claim. Note that although the announcements for any claimed no-shows must be provided, there is no
-way to prove/verify that the judgments were not received; this must simply be accepted.
+claim.
+
+The evidence provided for a tranche 0 announcement is simply the Bandersnatch signature from which
+the list of work-reports to audit was derived. For subsequent tranche announcements, separate
+evidence is provided for each announced work-report. This evidence consists of:
+
+- A Bandersnatch signature, $s_n(w)$ in the GP.
+- A list of announcements from the previous tranche, each declaring intent to audit the work-report
+  in question. Inclusion of an announcement in this list is a claim that no corresponding judgment
+  for the work-report in question was received (this cannot be proven and so must simply be
+  accepted). Each announcement in the list thus corresponds to a "no-show" and the length of the
+  list is the claimed number of no-shows. No two announcements in the list should be from the same
+  auditor.
 
 ```
 Header Hash = [u8; 32]
@@ -629,13 +640,15 @@ Reports = len++[Core Index ++ Work Report Hash]
 Ed25519 Signature = [u8; 64]
 Bandersnatch Signature = [u8; 96]
 Validator Index = u16
-No Shows = len++[Validator Index ++ Reports ++ Ed25519 Signature] (Previous tranche announcements)
+First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
+No-Show = Validator Index ++ Reports ++ Ed25519 Signature (An announcement from validator index in the previous tranche)
+Subsequent Tranche Evidence = Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]
 
 Auditor -> Auditor
 
 --> Header Hash ++ Tranche ++ Reports ++ Ed25519 Signature
-[Tranche 0] --> Bandersnatch Signature (s_0 in GP)
-[Tranche not 0] --> [Bandersnatch Signature (s_n(w) in GP) ++ No Shows] (One entry per WR in the first message)
+[Tranche 0] --> First Tranche Evidence
+[Tranche not 0] --> [Subsequent Tranche Evidence] (One entry per work-report in the first message)
 --> FIN
 <-- FIN
 ```
