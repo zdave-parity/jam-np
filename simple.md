@@ -69,8 +69,8 @@ credentials through submission of a valid work-package in order to retain their 
 
 Validators are conceptually linked in a grid structure. Two validators are linked if:
 
-- They are validators in the same epoch and either have the same row (`index / 31`) or the same
-  column (`index % 31`).
+- They are validators in the same epoch and either have the same row (`index / W`) or the same
+  column (`index % W`). `W` here is `floor(sqrt(V))`, where `V` is the number of validators.
 - They are validators in different epochs but have the same index.
 
 ### Epoch transitions
