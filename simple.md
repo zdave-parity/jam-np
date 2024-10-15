@@ -56,7 +56,7 @@ Given two Ed25519 public keys $(a, b)$, the Preferred Initiator $P(a, b) \in \{a
 
 ```math
 P(a, b) \equiv \begin{cases}
-    a &\text{when } \text{bits}(a)_{255} \oplus \text{bits}(b)_{255} \oplus (a < b)\\
+    a &\text{when } (a_{31} > 127) \oplus (b_{31} > 127) \oplus (a < b)\\
     b &\text{otherwise}
 \end{cases}
 ```
