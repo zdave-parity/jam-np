@@ -140,8 +140,8 @@ The following "common" types are used in multiple protocols.
 
 ```
 Header = As in GP
-Work Report = As in GP
-Hash = Header Hash = Work Report Hash = [u8; 32]
+Work-Report = As in GP
+Hash = Header Hash = Work-Report Hash = [u8; 32]
 
 Slot = u32
 Epoch Index = u32 (Slot / E)
@@ -151,7 +151,7 @@ Core Index = u16
 
 Ed25519 Signature = [u8; 64]
 
-Erasure Root = [u8; 32]
+Erasure-Root = [u8; 32]
 Shard Index = u16
 Bundle Shard = [u8]
 Segment Shard = [u8; 12]
@@ -254,7 +254,7 @@ Value = len++[u8]
 
 Node -> Node
 
---> Header Hash ++ Start Key ++ End Key ++ Maximum Size
+--> Header Hash ++ Key (Start) ++ Key (End) ++ Maximum Size
 --> FIN
 <-- [Boundary Node]
 <-- [Key ++ Value]
@@ -316,12 +316,12 @@ Note that the content of imported segments _should not_ be sent; it is the respo
 receiving guarantor to fetch this data from the availability system.
 
 ```
-Work Package = As in GP
+Work-Package = As in GP
 Extrinsic = [u8]
 
 Builder -> Guarantor
 
---> Core Index ++ Work Package
+--> Core Index ++ Work-Package
 --> [Extrinsic] (Message length should equal sum of extrinsic data lengths)
 --> FIN
 <-- FIN
@@ -337,13 +337,13 @@ using this protocol, but only after:
 - It has been determined that it is possible to generate a work-report that could be included on
   chain. This will involve, for example, verifying the WP's authorization.
 - All import segments have been retrieved. Note that this will involve mapping any WP hashes in the
-  import list to segment roots.
+  import list to segments-roots.
 
 The refine logic need not be executed before sharing a work-package; ideally, refinement should be
 done while waiting for the other guarantors to respond.
 
 Unlike CE 133, a full work-package bundle is sent, along with any necessary work-package hash to
-segment root mappings. The bundle includes imported data segments and their justifications as well
+segments-root mappings. The bundle includes imported data segments and their justifications as well
 as the work-package and extrinsic data. The bundle should precisely match the one that is
 ultimately erasure coded and made available in the case where the work-report gets included on
 chain.
@@ -351,20 +351,21 @@ chain.
 The guarantor receiving the work-package bundle should perform basic verification first and then
 execute the refine logic, returning the hash of the resulting work-report and a signature that can
 be included in a guaranteed work-report. The basic verification should include checking the
-validity of the authorization and checking the work-package hash to segment root mappings. If the
+validity of the authorization and checking the work-package hash to segments-root mappings. If the
 mappings cannot be verified, the guarantor may, at their discretion, either refuse to refine the
 work-package or blindly trust the mappings.
 
 ```
-Segment Root Mappings = len++[Work Package Hash ++ Segment Root]
-Work Package Bundle = As in GP
+Segments-Root = [u8; 32]
+Segments-Root Mappings = len++[Work-Package Hash ++ Segments-Root]
+Work-Package Bundle = As in GP
 
 Guarantor -> Guarantor
 
---> Core Index ++ Segment Root Mappings
---> Work Package Bundle
+--> Core Index ++ Segments-Root Mappings
+--> Work-Package Bundle
 --> FIN
-<-- Work Report Hash ++ Ed25519 Signature
+<-- Work-Report Hash ++ Ed25519 Signature
 <-- FIN
 ```
 
@@ -392,11 +393,11 @@ the next block. In particular, they should avoid producing and distributing work
 that are too far in the past or the future.
 
 ```
-Guaranteed Work Report = Work Report ++ Slot ++ len++[Validator Index ++ Ed25519 Signature] (As in GP)
+Guaranteed Work-Report = Work-Report ++ Slot ++ len++[Validator Index ++ Ed25519 Signature] (As in GP)
 
 Guarantor -> Validator
 
---> Guaranteed Work Report
+--> Guaranteed Work-Report
 --> FIN
 <-- FIN
 ```
@@ -414,9 +415,9 @@ should thus be queried first for missing reports.
 ```
 Node -> Node
 
---> Work Report Hash
+--> Work-Report Hash
 --> FIN
-<-- Work Report
+<-- Work-Report
 <-- FIN
 ```
 
@@ -427,7 +428,7 @@ work-report. The response should include a work-package bundle shard and a seque
 exported/proof segment shards. The response should also include a "justification", proving the
 correctness of the shards.
 
-The justification should be the co-path of the path from the erasure root to the shards, given by:
+The justification should be the co-path of the path from the erasure-root to the shards, given by:
 
 ```math
 T(\mathbf{s}, i, \mathcal{H})
@@ -436,7 +437,7 @@ T(\mathbf{s}, i, \mathcal{H})
 Where:
 
 - $\mathbf{s}$ is the sequence of (work-package bundle shard hash, segment shard root) pairs
-  satisfying $u = \mathcal{M}_B(\mathbf{s})$, where $u$ is the erasure root and $\mathcal{M}_B$ is
+  satisfying $u = \mathcal{M}_B(\mathbf{s})$, where $u$ is the erasure-root and $\mathcal{M}_B$ is
   as defined in the General Merklization appendix of the GP.
 - $i$ is the shard index.
 - $\mathcal{H}$ is the Blake 2b hash function.
@@ -449,7 +450,7 @@ Justification = [Hash OR (Hash ++ Hash)]
 
 Assurer -> Guarantor
 
---> Erasure Root ++ Shard Index
+--> Erasure-Root ++ Shard Index
 --> FIN
 <-- Bundle Shard
 <-- [Segment Shard] (Should include all exported and proof segment shards with the given index)
@@ -465,7 +466,7 @@ This protocol should be used by auditors to request work-package bundle shards f
 order to reconstruct work-package bundles for auditing. In addition to the requested shard, the
 response should include a justification, proving the correctness of the shard.
 
-The justification should be the co-path of the path from the erasure root to the shard. The assurer
+The justification should be the co-path of the path from the erasure-root to the shard. The assurer
 should construct this by appending the corresponding segment shard root to the justification
 received via CE 137. The last-but-one entry in the justification may consist of a pair of hashes.
 
@@ -474,7 +475,7 @@ Justification = [Hash OR (Hash ++ Hash)]
 
 Auditor -> Assurer
 
---> Erasure Root ++ Shard Index
+--> Erasure-Root ++ Shard Index
 --> FIN
 <-- Bundle Shard
 <-- Justification
@@ -493,7 +494,7 @@ justification for the returned segment shards. In the second variant, the assure
 justification for each returned segment shard, allowing the guarantor to immediately assess the
 correctness of the response.
 
-The justification for a segment shard should be the co-path from the erasure root to the shard,
+The justification for a segment shard should be the co-path from the erasure-root to the shard,
 given by:
 
 ```math
@@ -517,7 +518,7 @@ segment is inconsistent with its reconstructed proof, the segment and proof shou
 again, using shards retrieved with protocol 140. When using this protocol, the guarantor can verify
 the correctness of each response as it is received, requesting shards from a different assurer in
 the case of an incorrect response. If the reconstructed segment and proof are still inconsistent,
-then it can be concluded that the erasure root is invalid.
+then it can be concluded that the erasure-root is invalid.
 
 The number of segment shards requested in a single stream should not exceed $W_M = 2^{11}$ (this
 constant is defined in the GP).
@@ -528,7 +529,7 @@ Justification = [Hash OR (Hash ++ Hash) OR Segment Shard]
 
 Guarantor -> Assurer
 
---> [Erasure Root ++ Shard Index ++ len++[Segment Index]]
+--> [Erasure-Root ++ Shard Index ++ len++[Segment Index]]
 --> FIN
 <-- [Segment Shard]
 [Protocol 140 only] for each segment shard {
@@ -640,7 +641,7 @@ evidence is provided for each announced work-report. This evidence consists of:
 
 ```
 Tranche = u8
-Announcement = len++[Core Index ++ Work Report Hash] ++ Ed25519 Signature
+Announcement = len++[Core Index ++ Work-Report Hash] ++ Ed25519 Signature
 
 Bandersnatch Signature = [u8; 96]
 First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
@@ -681,7 +682,7 @@ Validity = { 0 (Invalid), 1 (Valid) } (Single byte)
 
 Auditor -> Validator
 
---> Epoch Index ++ Validator Index ++ Validity ++ Work Report Hash ++ Ed25519 Signature
+--> Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature
 --> FIN
 <-- FIN
 ```
