@@ -642,20 +642,22 @@ Header Hash = [u8; 32]
 Tranche = u8
 Core Index = u16
 Work Report Hash = [u8; 32]
-Reports = len++[Core Index ++ Work Report Hash]
 Ed25519 Signature = [u8; 64]
-Announcement = Reports ++ Ed25519 Signature
 Bandersnatch Signature = [u8; 96]
-First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
 Validator Index = u16
+
+Reports = len++[Core Index ++ Work Report Hash]
+Announcement = Reports ++ Ed25519 Signature
+
+First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
 No-Show = Validator Index ++ Announcement (From the previous tranche)
-Subsequent Tranche Evidence = Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]
+Subsequent Tranche Evidence = [Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]] (One entry per announced work-report)
+Evidence = First Tranche Evidence (If tranche is 0) OR Subsequent Tranche Evidence (If tranche is not 0)
 
 Auditor -> Auditor
 
 --> Header Hash ++ Tranche ++ Announcement
-[Tranche 0] --> First Tranche Evidence
-[Tranche not 0] --> [Subsequent Tranche Evidence] (One entry per work-report in the first message)
+--> Evidence
 --> FIN
 <-- FIN
 ```
