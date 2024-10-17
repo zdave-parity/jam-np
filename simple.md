@@ -129,6 +129,29 @@ In the protocol descriptions below:
   length. If a sequence is not preceded by `len++`, the length is either fixed or implied by
   context.
 
+### Common types
+
+The following "common" types are used in multiple protocols.
+
+```
+Header = As in GP
+Work Report = As in GP
+Hash = Header Hash = Work Report Hash = [u8; 32]
+
+Slot = u32
+Epoch Index = u32 (Slot / E)
+
+Validator Index = u16
+Core Index = u16
+
+Ed25519 Signature = [u8; 64]
+
+Erasure Root = [u8; 32]
+Shard Index = u16
+Bundle Shard = [u8]
+Segment Shard = [u8; 12]
+```
+
 ### UP 0: Block announcement
 
 This should be opened between two nodes if either:
@@ -152,12 +175,9 @@ The header hash and slot of the latest finalized block should be included in the
 and also in every announcement message that is sent.
 
 ```
-Header Hash = [u8; 32]
-Slot = u32
 Final = Header Hash ++ Slot
 Leaf = Header Hash ++ Slot
 Handshake = Final ++ len++[Leaf]
-Header = As in GP
 Announcement = Header ++ Final
 
 Node -> Node
@@ -186,7 +206,6 @@ unknown, the actual work-reports and preimages should be requested using protoco
 respectively.
 
 ```
-Header Hash = [u8; 32]
 Direction = { 0 (Ascending exclusive), 1 (Descending inclusive) } (Single byte)
 Maximum Blocks = u32
 Block = As in GP
@@ -223,7 +242,6 @@ Note that the keys in the response are only 31 bytes, as the final key byte is i
 Merklization function.
 
 ```
-Header Hash = [u8; 32]
 Key = [u8; 31] (First 31 bytes of key only)
 Maximum Size = u32
 Boundary Node = As returned by B/L, defined in the State Merklization appendix of the GP
@@ -271,14 +289,13 @@ known with certainty, the stream should be reset/stopped. This applies to both p
 132.
 
 ```
-Epoch Index = u32 (Should identify the epoch that the ticket will be used in)
 Attempt = { 0, 1 } (Single byte)
 Bandersnatch RingVRF Proof = [u8; 784]
 Ticket = Attempt ++ Bandersnatch RingVRF Proof (As in GP)
 
 Validator -> Validator
 
---> Epoch Index ++ Ticket
+--> Epoch Index ++ Ticket (Epoch index should identify the epoch that the ticket will be used in)
 --> FIN
 <-- FIN
 ```
@@ -294,7 +311,6 @@ Note that the content of imported segments _should not_ be sent; it is the respo
 receiving guarantor to fetch this data from the availability system.
 
 ```
-Core Index = u16
 Work Package = As in GP
 Extrinsic = [u8]
 
@@ -335,11 +351,8 @@ mappings cannot be verified, the guarantor may, at their discretion, either refu
 work-package or blindly trust the mappings.
 
 ```
-Core Index = u16
 Segment Root Mappings = len++[Work Package Hash ++ Segment Root]
 Work Package Bundle = As in GP
-Work Report Hash = [u8; 32]
-Ed25519 Signature = [u8; 64]
 
 Guarantor -> Guarantor
 
@@ -366,10 +379,6 @@ reasonable amount of time (e.g. two seconds) to produce an additional signature 
 guaranteed work-report is distrubuted.
 
 ```
-Work Report = As in GP
-Slot = u32
-Validator Index = u16
-Ed25519 Signature = [u8; 64]
 Guaranteed Work Report = Work Report ++ Slot ++ len++[Validator Index ++ Ed25519 Signature] (As in GP)
 
 Guarantor -> Validator
@@ -390,9 +399,6 @@ A node announcing a new block may be assumed to possess the referenced work-repo
 should thus be queried first for missing reports.
 
 ```
-Work Report Hash = [u8; 32]
-Work Report = As in GP
-
 Node -> Node
 
 --> Work Report Hash
@@ -426,11 +432,6 @@ Where:
 Note that the last entry in the justification may consist of a pair of hashes.
 
 ```
-Erasure Root = [u8; 32]
-Shard Index = u16
-Bundle Shard = [u8]
-Segment Shard = [u8; 12]
-Hash = [u8; 32]
 Justification = [Hash OR (Hash ++ Hash)]
 
 Assurer -> Guarantor
@@ -456,10 +457,6 @@ should construct this by appending the corresponding segment shard root to the j
 received via CE 137. The last-but-one entry in the justification may consist of a pair of hashes.
 
 ```
-Erasure Root = [u8; 32]
-Shard Index = u16
-Bundle Shard = [u8]
-Hash = [u8; 32]
 Justification = [Hash OR (Hash ++ Hash)]
 
 Auditor -> Assurer
@@ -513,11 +510,7 @@ The number of segment shards requested in a single stream should not exceed $W_M
 constant is defined in the GP).
 
 ```
-Erasure Root = [u8; 32]
-Shard Index = u16
 Segment Index = u16
-Segment Shard = [u8; 12]
-Hash = [u8; 32]
 Justification = [Hash OR (Hash ++ Hash) OR Segment Shard]
 
 Guarantor -> Assurer
@@ -541,10 +534,8 @@ the next validator set for the distribution 2 seconds before a new epoch -- the 
 extrinsic and block seal are both checked using the posterior keysets.
 
 ```
-Anchor Hash = [u8; 32]
 Bitfield = [u8; 43] (One bit per core)
-Ed25519 Signature = [u8; 64]
-Assurance = Anchor Hash ++ Bitfield ++ Ed25519 Signature
+Assurance = Header Hash (Anchor) ++ Bitfield ++ Ed25519 Signature
 
 Assurer -> Validator
 
@@ -566,8 +557,6 @@ Preimage announcements _should not_ be forwarded to other validators; validators
 preimages only be including them in blocks they author.
 
 ```
-Hash = [u8; 32]
-
 Node -> Validator
 
 --> Hash
@@ -592,7 +581,6 @@ is expected to be checked against a different database (in the case of this prot
 lookup database).
 
 ```
-Hash = [u8; 32]
 Preimage = [u8]
 
 Node -> Node
@@ -638,17 +626,10 @@ evidence is provided for each announced work-report. This evidence consists of:
   auditor.
 
 ```
-Header Hash = [u8; 32]
 Tranche = u8
-Core Index = u16
-Work Report Hash = [u8; 32]
-Ed25519 Signature = [u8; 64]
+Announcement = len++[Core Index ++ Work Report Hash] ++ Ed25519 Signature
+
 Bandersnatch Signature = [u8; 96]
-Validator Index = u16
-
-Reports = len++[Core Index ++ Work Report Hash]
-Announcement = Reports ++ Ed25519 Signature
-
 First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
 No-Show = Validator Index ++ Announcement (From the previous tranche)
 Subsequent Tranche Evidence = [Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]] (One entry per announced work-report)
@@ -683,11 +664,7 @@ grid structure. The intent of this is to increase the likelihood that negative j
 by all auditors.
 
 ```
-Epoch Index = u32
-Validator Index = u16
 Validity = { 0 (Invalid), 1 (Valid) } (Single byte)
-Work Report Hash = [u8; 32]
-Ed25519 Signature = [u8; 64]
 
 Auditor -> Validator
 
