@@ -372,16 +372,24 @@ Guarantor -> Guarantor
 
 Distribution of a fully guaranteed work-report ready for inclusion in a block.
 
-After sharing a work-package received via CE 133 and getting back a signature from at least one
-other guarantor, a guaranteed work-report may be constructed and distributed.
+After sharing a work-package received via CE 133 and getting back a signature from another
+guarantor, a guaranteed work-report may be constructed. The third guarantor should be given a
+reasonable amount of time (e.g. two seconds) to produce an additional signature before the
+guaranteed work-report is distrubuted.
 
 Guaranteed work-reports should be distributed to all current validators, and during the last core
 rotation of an epoch, additionally to all validators for the next epoch. Note that these validator
 sets are likely to overlap.
 
-Once in possession of two signatures for a work-report, the third guarantor should be given a
-reasonable amount of time (e.g. two seconds) to produce an additional signature before the
-guaranteed work-report is distrubuted.
+There are two reasons for distributing to the validators for the next epoch:
+
+- These validators may be able to include the work-report in a block themselves.
+- If the work-report is included in a block by a current validator, they will need the work-report
+  in order to validate the block and keep up with the chain.
+
+Guarantors should try to avoid producing and distributing work-reports that cannot be included in
+the next block. In particular, they should avoid producing and distributing work-reports with slots
+that are too far in the past or the future.
 
 ```
 Guaranteed Work Report = Work Report ++ Slot ++ len++[Validator Index ++ Ed25519 Signature] (As in GP)
