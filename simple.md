@@ -75,11 +75,16 @@ Validators are conceptually linked in a grid structure. Two validators are linke
 
 ### Epoch transitions
 
-At the beginning of a new epoch, validators should wait to apply connectivity changes until at
-least one block in the previous or new epoch is finalized. The intent of this rule is to ensure
-that the validator set currently required to advance finality remains connected. In normal
-operation, where finality is running shortly behind block production, no waiting should be
-required.
+At the beginning of a new epoch, validators should wait to apply connectivity changes until both:
+
+- The first block in the epoch has been finalized.
+- At least 2 minutes have elapsed since the beginning of the epoch.
+
+This rule is intended to:
+
+- Ensure that the validator set currently required to advance finality remains connected.
+- Ensure consensus is reached on new connectivity before it is applied.
+- Synchronize connectivity changes across validators, making epoch transitions smoother.
 
 ## Protocols and streams
 
@@ -269,7 +274,7 @@ Protocol 131 is used for the first step (generating validator to proxy validator
 used for the second step (proxy validator to all current validators). Both protocols look the same
 on the wire; the difference is only in which step they are used for.
 
-The first step should be performed shortly after the connectivity changes for a new epoch are
+The first step should be performed one minute after the connectivity changes for a new epoch are
 applied. The index of the proxy validator for a ticket is determined by interpreting the last 4
 bytes of the ticket's VRF output as a big-endian unsigned integer, modulo the number of validators.
 The proxy validator is selected from the next epoch's validator list. If the generating validator
@@ -279,10 +284,10 @@ following section.
 
 Proxy validators should verify the proof of any ticket they receive, and verify that they are the
 correct proxy for the ticket. If these checks succeed, they should forward the ticket to all
-current validators. Forwarding should be delayed until 2 minutes into the epoch, to avoid exposing
-the timing of the message from the generating validator. Forwarding should be evenly spaced out
-from this point until half-way through the Safrole lottery period. Forwarding may be stopped if the
-ticket is included in a finalized block.
+current validators. Forwarding should be delayed until 3 minutes after the application of
+connectivity changes, to avoid exposing the timing of the message from the generating validator.
+Forwarding should be evenly spaced out from this point until half-way through the Safrole lottery
+period. Forwarding may be stopped if the ticket is included in a finalized block.
 
 If finality is running far enough behind that the state required to verify a received ticket is not
 known with certainty, the stream should be reset/stopped. This applies to both protocol 131 and
