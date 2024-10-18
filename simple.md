@@ -30,9 +30,9 @@ Encryption and authentication occur as usual in TLS:
 ### ALPN
 
 The protocol name, version, and chain are identified using QUIC/TLS "ALPN" (Application Layer
-Protocol Negotiation). The protocol identifier should be either `jamnp-s/V/H` or
+Protocol Negotiation). The (ASCII-encoded) protocol identifier should be either `jamnp-s/V/H` or
 `jamnp-s/V/H/builder`. Here `V` is the protocol version, `0`, and `H` is the first 8 nibbles of the
-hash of the chain's genesis block header, in lower-case hexadecimal.
+hash of the chain's genesis header, in lower-case hexadecimal.
 
 The `/builder` suffix should always be permitted by the side accepting the connection, but only
 used by the side initiating the connection if it is connecting as a work-package builder. Note that
