@@ -112,9 +112,13 @@ After opening a stream, the stream initiator must send a single byte identifying
 UP stream kinds are numbered starting from 0, CE stream kinds are numbered starting from 128. The
 identified protocol becomes active immediately after this byte is sent.
 
+### Messages
+
 All stream protocols are specified in terms of _messages_. A message is transmitted in two parts.
 First, the size (in bytes) of the message content is transmitted, encoded as a little-endian 32-bit
 unsigned integer. Second, the message content itself is transmitted.
+
+### Notation
 
 In the protocol descriptions below:
 
