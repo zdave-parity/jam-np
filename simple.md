@@ -65,14 +65,6 @@ Validators should accept connections from other nodes too, with a reasonable num
 20) reserved for work-package builders. Builders may reasonably be required to prove their
 credentials through submission of a valid work-package in order to retain their connection.
 
-### Grid structure
-
-Validators are conceptually linked in a grid structure. Two validators are linked if:
-
-- They are validators in the same epoch and either have the same row (`index / W`) or the same
-  column (`index % W`). `W` here is `floor(sqrt(V))`, where `V` is the number of validators.
-- They are validators in different epochs but have the same index.
-
 ### Epoch transitions
 
 At the beginning of a new epoch, validators should wait to apply connectivity changes until both:
@@ -161,11 +153,21 @@ Bundle Shard = [u8]
 Segment Shard = [u8; 12]
 ```
 
+### Grid structure
+
+Primarily for the purpose of block announcements, the previous, current, and next validator sets
+are conceptually arranged in a grid structure. Two validators are considered neighbours in the grid
+if:
+
+- They are validators in the same epoch and either have the same row (`index / W`) or the same
+  column (`index % W`). `W` here is `floor(sqrt(V))`, where `V` is the number of validators.
+- They are validators in different epochs but have the same index.
+
 ### UP 0: Block announcement
 
 This should be opened between two nodes if either:
 
-- Both nodes are validators, and are linked in the grid structure.
+- Both nodes are validators, and are neighbours in the grid structure.
 - At least one of the nodes is not a validator.
 
 Here, "validator" means a validator in either the previous, current, or next epoch. As this is a UP
@@ -677,9 +679,9 @@ judgments, this broadcasting may optionally be deferred until a negative judgmen
 work-report is observed (which may never happen).
 
 On receipt of a new negative judgment for a work-report that the node is (potentially) responsible
-for auditing, the judgment should be forwarded to all other known auditors that are linked via the
-grid structure. The intent of this is to increase the likelihood that negative judgments are seen
-by all auditors.
+for auditing, the judgment should be forwarded to all other known auditors that are neighbours in
+the grid structure. The intent of this is to increase the likelihood that negative judgments are
+seen by all auditors.
 
 ```
 Validity = { 0 (Invalid), 1 (Valid) } (Single byte)
