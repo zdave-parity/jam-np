@@ -570,16 +570,19 @@ Announcement of possession of a requested preimage. This should be used by non-v
 introduce preimages.
 
 The recipient of the announcement is expected to follow up by requesting the preimage using
-protocol 143, provided the preimage has been requested on chain and the recipient is not already in
-possession of it.
+protocol 143, provided the preimage has been requested on chain by the given service and the
+recipient is not already in possession of it.
 
 Preimage announcements _should not_ be forwarded to other validators; validators should propagate
 preimages only be including them in blocks they author.
 
 ```
+Service ID = u32
+Preimage Length = u32
+
 Node -> Validator
 
---> Hash
+--> Service ID ++ Hash ++ Preimage Length
 --> FIN
 <-- FIN
 ```
@@ -597,8 +600,7 @@ Requests for a preimage should be made to nodes that have announced possession o
 preimage itself or of a block containing the hash of the preimage in its lookup extrinsic.
 
 Note that this protocol is essentially the same as protocol 136 (work-report request), but the hash
-is expected to be checked against a different database (in the case of this protocol, the preimage
-lookup database).
+is expected to be checked against a different database.
 
 ```
 Preimage = [u8]
