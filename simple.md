@@ -128,7 +128,11 @@ In the protocol descriptions below:
 - Encoding is as per the serialization codec defined in the gray paper.
 - `len++` preceding a sequence indicates that the sequence should be explicitly prefixed by its
   length. If a sequence is not preceded by `len++`, the length is either fixed or implied by
-  context.
+  context. In the case of a message consisting of a single sequence, the length of the sequence is
+  implied by the message size in bytes. If the encoded size of an element of the sequence is fixed,
+  the length of the sequence can be trivially calculated by dividing the message size by this size.
+  Otherwise, the sequence length can be determined by reading and decoding elements one at a time
+  from the stream until the number of bytes read matches the size of the message.
 
 ### Common types
 
@@ -245,7 +249,7 @@ the given start key is not present in the state trie, the "path to the start key
 either at a fork node with an all-zeroes hash in the branch that would be taken for the start key,
 or at a leaf node with a different key.
 
-The total encoded length of the response should not exceed the given maximum size in bytes, unless
+The total encoded size of the response should not exceed the given maximum size in bytes, unless
 the response contains only a single key/value pair. As such, the response may not cover the full
 requested range.
 
@@ -328,7 +332,7 @@ Extrinsic = [u8]
 Builder -> Guarantor
 
 --> Core Index ++ Work-Package
---> [Extrinsic] (Message length should equal sum of extrinsic data lengths)
+--> [Extrinsic] (Message size should equal sum of extrinsic data lengths)
 --> FIN
 <-- FIN
 ```
