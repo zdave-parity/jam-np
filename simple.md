@@ -169,7 +169,7 @@ if:
 
 ### UP 0: Block announcement
 
-This should be opened between two nodes if either:
+This should be opened between two connected nodes if either:
 
 - Both nodes are validators, and are neighbours in the grid structure.
 - At least one of the nodes is not a validator.
@@ -180,11 +180,12 @@ protocol, the initiator of the connection is responsible for opening the stream 
 Both sides should begin by sending a handshake message containing all known leaves (descendants of
 the latest finalized block with no known children).
 
-An announcement should be sent on the stream whenever a new block is produced or received.
-Announcement of a block may only be skipped if:
+An announcement should be sent on the stream whenever a new, valid, block is produced or received.
+Announcement of a block may only be skipped if either:
 
 - A descendant of the block is announced instead.
 - The block is not a descendant of the latest finalized block.
+- The block, or a descendant of the block, has been announced by the other side of the stream.
 
 The header hash and slot of the latest finalized block should be included in the handshake message
 and also in every announcement message that is sent.
