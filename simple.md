@@ -125,6 +125,8 @@ In the protocol descriptions below:
   unless otherwise specified, CE streams should only be considered successful if both halves of the
   stream are cleanly terminated.
 - `++` indicates concatenation.
+- `{ ... }` indicates a set of possible values; for example, `Direction = { 0, 1 }` means a
+  `Direction` can be either `0` or `1`.
 - Encoding is as per the serialization codec defined in the gray paper.
 - `len++` preceding a sequence indicates that the sequence should be explicitly prefixed by its
   length. If a sequence is not preceded by `len++`, the length is either fixed or implied by
@@ -455,7 +457,7 @@ Where:
 - $T$ is as defined in the General Merklization appendix of the GP.
 
 ```
-Justification = [Hash OR (Hash ++ Hash)]
+Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }]
 
 Assurer -> Guarantor
 
@@ -480,7 +482,7 @@ should construct this by appending the corresponding segment shard root to the j
 received via CE 137.
 
 ```
-Justification = [Hash OR (Hash ++ Hash)]
+Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }]
 
 Auditor -> Assurer
 
@@ -531,7 +533,7 @@ constant is defined in the GP).
 
 ```
 Segment Index = u16
-Justification = [Hash OR (Hash ++ Hash) OR Segment Shard]
+Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash, 2 ++ Segment Shard }]
 
 Guarantor -> Assurer
 
@@ -655,7 +657,7 @@ Bandersnatch Signature = [u8; 96]
 First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
 No-Show = Validator Index ++ Announcement (From the previous tranche)
 Subsequent Tranche Evidence = [Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]] (One entry per announced work-report)
-Evidence = First Tranche Evidence (If tranche is 0) OR Subsequent Tranche Evidence (If tranche is not 0)
+Evidence = { First Tranche Evidence (If tranche is 0), Subsequent Tranche Evidence (If tranche is not 0) }
 
 Auditor -> Auditor
 
