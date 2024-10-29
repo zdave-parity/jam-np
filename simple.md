@@ -454,8 +454,6 @@ Where:
 - $\mathcal{H}$ is the Blake 2b hash function.
 - $T$ is as defined in the General Merklization appendix of the GP.
 
-Note that the last entry in the justification may consist of a pair of hashes.
-
 ```
 Justification = [Hash OR (Hash ++ Hash)]
 
@@ -479,7 +477,7 @@ response should include a justification, proving the correctness of the shard.
 
 The justification should be the co-path of the path from the erasure-root to the shard. The assurer
 should construct this by appending the corresponding segment shard root to the justification
-received via CE 137. The last-but-one entry in the justification may consist of a pair of hashes.
+received via CE 137.
 
 ```
 Justification = [Hash OR (Hash ++ Hash)]
@@ -520,9 +518,6 @@ Where:
 - $i$ is the segment index.
 - $\mathcal{H}$ is the Blake 2b hash function.
 - $T$ is as defined in the General Merklization appendix of the GP.
-
-Note that one entry in the justification may be a pair of hashes, and the last entry may be a
-segment shard.
 
 Guarantors should initially use protocol 139 to fetch segment shards. If a reconstructed import
 segment is inconsistent with its reconstructed proof, the segment and proof should be reconstructed
