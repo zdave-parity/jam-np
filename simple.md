@@ -457,7 +457,7 @@ Where:
 - $T$ is as defined in the General Merklization appendix of the GP.
 
 ```
-Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }]
+Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }] (Each discriminator is a single byte)
 
 Assurer -> Guarantor
 
@@ -482,7 +482,7 @@ should construct this by appending the corresponding segment shard root to the j
 received via CE 137.
 
 ```
-Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }]
+Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }] (Each discriminator is a single byte)
 
 Auditor -> Assurer
 
@@ -533,7 +533,7 @@ constant is defined in the GP).
 
 ```
 Segment Index = u16
-Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash, 2 ++ Segment Shard }]
+Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash, 2 ++ Segment Shard }] (Each discriminator is a single byte)
 
 Guarantor -> Assurer
 
