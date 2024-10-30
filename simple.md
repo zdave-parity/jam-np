@@ -125,8 +125,6 @@ In the protocol descriptions below:
   unless otherwise specified, CE streams should only be considered successful if both halves of the
   stream are cleanly terminated.
 - `++` indicates concatenation.
-- `{ ... }` indicates a set of possible values; for example, `Direction = { 0, 1 }` means a
-  `Direction` can be either `0` or `1`.
 - Encoding is as per the serialization codec defined in the gray paper.
 - `len++` preceding a sequence indicates that the sequence should be explicitly prefixed by its
   length. If a sequence is not preceded by `len++`, the length is either fixed or implied by
@@ -224,7 +222,7 @@ unknown, the actual work-reports and preimages should be requested using protoco
 respectively.
 
 ```
-Direction = { 0 (Ascending exclusive), 1 (Descending inclusive) } (Single byte)
+Direction = 0 (Ascending exclusive) OR 1 (Descending inclusive) (Single byte)
 Maximum Blocks = u32
 Block = As in GP
 
@@ -307,7 +305,7 @@ known with certainty, the stream should be reset/stopped. This applies to both p
 132.
 
 ```
-Attempt = { 0, 1 } (Single byte)
+Attempt = 0 OR 1 (Single byte)
 Bandersnatch RingVRF Proof = [u8; 784]
 Ticket = Attempt ++ Bandersnatch RingVRF Proof (As in GP)
 
@@ -457,7 +455,7 @@ Where:
 - $T$ is as defined in the General Merklization appendix of the GP.
 
 ```
-Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }] (Each discriminator is a single byte)
+Justification = [0 ++ Hash OR 1 ++ Hash ++ Hash] (Each discriminator is a single byte)
 
 Assurer -> Guarantor
 
@@ -482,7 +480,7 @@ should construct this by appending the corresponding segment shard root to the j
 received via CE 137.
 
 ```
-Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash }] (Each discriminator is a single byte)
+Justification = [0 ++ Hash OR 1 ++ Hash ++ Hash] (Each discriminator is a single byte)
 
 Auditor -> Assurer
 
@@ -533,7 +531,7 @@ constant is defined in the GP).
 
 ```
 Segment Index = u16
-Justification = [{ 0 ++ Hash, 1 ++ Hash ++ Hash, 2 ++ Segment Shard }] (Each discriminator is a single byte)
+Justification = [0 ++ Hash OR 1 ++ Hash ++ Hash OR 2 ++ Segment Shard] (Each discriminator is a single byte)
 
 Guarantor -> Assurer
 
@@ -657,7 +655,7 @@ Bandersnatch Signature = [u8; 96]
 First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
 No-Show = Validator Index ++ Announcement (From the previous tranche)
 Subsequent Tranche Evidence = [Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]] (One entry per announced work-report)
-Evidence = { First Tranche Evidence (If tranche is 0), Subsequent Tranche Evidence (If tranche is not 0) }
+Evidence = First Tranche Evidence (If tranche is 0) OR Subsequent Tranche Evidence (If tranche is not 0)
 
 Auditor -> Auditor
 
@@ -688,7 +686,7 @@ the grid structure. The intent of this is to increase the likelihood that negati
 seen by all auditors.
 
 ```
-Validity = { 0 (Invalid), 1 (Valid) } (Single byte)
+Validity = 0 (Invalid) OR 1 (Valid) (Single byte)
 
 Auditor -> Validator
 
