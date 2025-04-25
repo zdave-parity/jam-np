@@ -78,6 +78,23 @@ This rule is intended to:
 - Ensure consensus is reached on new connectivity before it is applied.
 - Synchronize connectivity changes across validators, making epoch transitions smoother.
 
+## Shard assignment
+
+Erasure coded shards are assigned to validators as follows:
+
+```math
+i = (cR + v) \mod V
+```
+
+Where:
+
+- $v$ is the index of a validator.
+- $i$ is the index of the shard assigned to the validator.
+- $c$ is the index of the core which produced the work-report.
+- $R$ is the recovery threshold: the minimum number of EC shards required to recover the original
+  data. With 1023 validators, $R = 342$.
+- $V$ is the number of validators.
+
 ## Protocols and streams
 
 All communication happens over bidirectional QUIC streams. Many such streams may be in existence at
