@@ -83,7 +83,7 @@ This rule is intended to:
 Erasure coded shards are assigned to validators as follows:
 
 ```math
-i = (cR + v) \mod V
+i = (cR + v) \bmod V
 ```
 
 Where:
