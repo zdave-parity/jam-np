@@ -175,7 +175,9 @@ This should be opened between two connected nodes if either:
 - At least one of the nodes is not a validator.
 
 Here, "validator" means a validator in either the previous, current, or next epoch. As this is a UP
-protocol, the initiator of the connection is responsible for opening the stream when necessary.
+protocol, the initiator of the connection is responsible for opening the stream when necessary. At
+the beginning of a new epoch, UP 0 stream adjustments should be made at the same time as
+connectivity changes are applied; see the section on epoch transitions above.
 
 Both sides should begin by sending a handshake message containing all known leaves (descendants of
 the latest finalized block with no known children).
