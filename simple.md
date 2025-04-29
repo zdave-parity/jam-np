@@ -159,9 +159,9 @@ Segment Shard = [u8; 12]
 
 ### Grid structure
 
-Primarily for the purpose of block announcements, the previous, current, and next validator sets
-are conceptually arranged in a grid structure. Two validators are considered neighbours in the grid
-if:
+Primarily for the purpose of block and preimage announcements, the previous, current, and next
+validator sets are conceptually arranged in a grid structure. Two validators are considered
+neighbours in the grid if:
 
 - They are validators in the same epoch and either have the same row (`index / W`) or the same
   column (`index % W`). `W` here is `floor(sqrt(V))`, where `V` is the number of validators.
