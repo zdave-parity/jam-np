@@ -558,9 +558,11 @@ Guarantor -> Assurer
 Distribution of an availability assurance ready for inclusion in a block.
 
 Assurers should distribute availability assurances approximately 2 seconds before each slot, to all
-possible block authors. Note that the assurer set and the block author set should switch over to
-the next validator set for the distribution 2 seconds before a new epoch -- the assurances
-extrinsic and block seal are both checked using the posterior keysets.
+possible block authors. Note that the assurer set should switch over to the next validator set for
+the distribution 4 seconds after a new epoch, whereas the block author set should switch over for
+the distribution one slot earlier (2 seconds before the new epoch). This is because the assurances
+extrinsic is checked using the prior keysets, while the block seal is checked using the posterior
+keysets.
 
 ```
 Bitfield = [u8; 43] (One bit per core)
@@ -620,7 +622,7 @@ Node -> Node
 
 Announcement of requirement to audit.
 
-Auditors of a block (defined to be the posterior validator set) should, at the beginning of each
+Auditors of a block (defined to be the prior validator set) should, at the beginning of each
 tranche, broadcast an announcement to all other such auditors specifying which work-reports they
 intend to audit, unless they do not intend to audit any work-reports, in which case no announcement
 should be sent.
