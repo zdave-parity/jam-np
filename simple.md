@@ -584,14 +584,14 @@ Assurer -> Validator
 ### CE 142: Preimage announcement
 
 Announcement of possession of a requested preimage. This should be used by non-validator nodes to
-introduce preimages.
+introduce preimages, and by validators to gossip these preimages to other validators.
 
 The recipient of the announcement is expected to follow up by requesting the preimage using
 protocol 143, provided the preimage has been requested on chain by the given service and the
 recipient is not already in possession of it.
 
-Preimage announcements _should not_ be forwarded to other validators; validators should propagate
-preimages only be including them in blocks they author.
+Once a validator has obtained a requested preimage, it should announce possession to its neighbours
+in the grid structure.
 
 ```
 Service ID = u32
