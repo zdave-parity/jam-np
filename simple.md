@@ -219,10 +219,6 @@ There are two types of request:
 
 The number of blocks in the response should be limited to the given maximum.
 
-Note that blocks directly contain only the hashes of included work-reports and preimages. If
-unknown, the actual work-reports and preimages should be requested using protocols 136 and 143
-respectively.
-
 ```
 Direction = 0 (Ascending exclusive) OR 1 (Descending inclusive) (Single byte)
 Maximum Blocks = u32
@@ -395,12 +391,6 @@ Guaranteed work-reports should be distributed to all current validators, and dur
 rotation of an epoch, additionally to all validators for the next epoch. Note that these validator
 sets are likely to overlap.
 
-There are two reasons for distributing to the validators for the next epoch:
-
-- These validators may be able to include the work-report in a block themselves.
-- If the work-report is included in a block by a current validator, they will need the work-report
-  in order to validate the block and keep up with the chain.
-
 Guarantors should try to avoid producing and distributing work-reports that cannot be included in
 the next block. In particular, they should avoid producing and distributing work-reports with slots
 that are too far in the past or the future.
@@ -419,14 +409,14 @@ Guarantor -> Validator
 
 Request for the work-report with the given hash.
 
-This should be used to request missing work-reports on receipt of a new block; blocks directly
-contain only the hashes of included work-reports.
+This should be used by auditors to request missing work-reports which have been negatively judged
+by other auditors.
 
-A node announcing a new block may be assumed to possess the referenced work-reports. Such nodes
-should thus be queried first for missing reports.
+An auditor publishing or forwarding a negative judgment may be assumed to possess the referenced
+work-report. Such auditors should thus be queried first for missing reports.
 
 ```
-Node -> Node
+Auditor -> Auditor
 
 --> Work-Report Hash
 --> FIN
@@ -610,13 +600,7 @@ Node -> Validator
 
 Request for a preimage of the given hash.
 
-This should be used to request:
-
-- Preimages announced via protocol 142.
-- Missing preimages of hashes in the lookup extrinsics of new blocks.
-
-Requests for a preimage should be made to nodes that have announced possession of either the
-preimage itself or of a block containing the hash of the preimage in its lookup extrinsic.
+This should be used to request preimages announced via protocol 142.
 
 Note that this protocol is essentially the same as protocol 136 (work-report request), but the hash
 is expected to be checked against a different database.
