@@ -679,16 +679,20 @@ An announcement declaring intention to audit a particular work-report must be fo
 judgment, declaring the work-report to either be valid or invalid, as soon as this has been
 determined.
 
-Any judgments produced should also be broadcast to the validator set(s) for the epoch(s) following
-the block(s) in which the audited work-report was declared available. This is to ensure the
-judgments are available for block authors to include in the disputes extrinsic. For positive
-judgments, this broadcasting may optionally be deferred until a negative judgment for the
-work-report is observed (which may never happen).
+Any judgments produced should also be broadcast to the validator set(s) succeeding the relevant
+auditor set(s). This is to ensure the judgments are available to all block authors capable of
+including them in a disputes extrinsic. For positive judgments, this broadcasting may optionally be
+deferred until a negative judgment for the work-report is observed (which may never happen).
 
-On receipt of a new negative judgment for a work-report that the node is (potentially) responsible
-for auditing, the judgment should be forwarded to all other known auditors that are neighbours in
-the grid structure. The intent of this is to increase the likelihood that negative judgments are
-seen by all auditors.
+On receipt of a new negative judgment for a work-report that the node is responsible for auditing
+(as determined by the epoch index):
+
+- The node should obtain the work-report using CE 136 if it does not already have it.
+- The negative judgment should be forwarded to all other known auditors that are neighbours in the
+  grid structure. The intent of this is to increase the likelihood that negative judgments are seen
+  by all auditors.
+- The node should audit the work-report, if it has not already done so, publishing its own judgment
+  following this.
 
 ```
 Validity = 0 (Invalid) OR 1 (Valid) (Single byte)
