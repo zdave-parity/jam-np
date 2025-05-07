@@ -703,3 +703,85 @@ Auditor -> Validator
 --> FIN
 <-- FIN
 ```
+
+### CE 146: GRANDPA Vote
+
+GRANDPA voter sets match validator sets for each epoch.
+This is sent by each voting validator to all other voting validators.
+
+```
+Ed25519 Public = [u8; 32]
+Round Number = u64
+Set Id = u32
+Prevote = Header Hash ++ Slot
+Precommit = Header Hash ++ Slot
+PrimaryPropose = Header Hash ++ Slot
+Message = Enum {
+  0 = Prevote,
+  1 = Precommit,
+  2 = PrimaryPropose
+}
+Signed Message = Message ++ Ed25519 Signature ++ Ed25519 Public
+
+Validator -> Validator
+
+--> 0 ++ Round Number ++ Set Id ++ Signed Message
+--> FIN
+<-- FIN
+```
+
+### CE 147: GRANDPA Commit
+
+This is sent by each voting validator to all other voting validators.
+
+```
+Precommits = len++[Precommit]
+Multi Auth Data = len++[Ed25519 Signature ++ Ed25519 Public]
+Compact Commit = Header Hash ++ Slot ++ Precommits ++ Multi Auth Data
+
+Validator -> Validator
+
+--> 1 ++ Round Number ++ Set Id ++ Compact Commit
+--> FIN
+<-- FIN
+```
+
+### CE 148: GRANDPA State
+
+This is sent by each voting validator to all other voting validators and informs them of the latest round it is participating in.
+
+```
+Validator -> Validator
+
+--> 2 ++ Round Number ++ Set Id ++ Slot
+--> FIN
+<-- FIN
+```
+
+### CE 149: GRANDPA CatchUp
+
+Catchup Request. This is sent by a voting validator to another validator.
+
+```
+Validator -> Validator
+
+--> 3 ++ Round Number ++ Set Id
+--> FIN
+<-- FIN
+```
+
+Catchup Response. This includes all votes required to catch up state to that of the responding voter.
+
+```
+Signed Prevote = Prevote ++ Ed25519 Signature ++ Ed25519 Public
+Signed Precommit = Precommit ++ Ed25519 Signature ++ Ed25519 Public
+Base Hash = Header Hash
+Base Number = Slot
+Catchup = Round Number ++ len++[Signed Prevote] ++ len++[Signed Precommit] ++ Base Hash ++ Base Number
+
+Validator -> Validator
+
+--> 4 ++ Set Id ++ Catchup
+--> FIN
+<-- FIN
+```
