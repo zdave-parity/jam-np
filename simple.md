@@ -35,10 +35,10 @@ should be computed as follows:
 ```math
 \begin{align}
 B(n, l) &\equiv \begin{cases}
-    "" &\text{when } l = 0\\
-    ["abcdefghijklmnopqrstuvwxyz234567"[n \bmod 32]] \frown B(\left\lfloor n / 32 \right\rfloor, l - 1) &\text{otherwise}
+    [] &\text{when } l = 0\\
+    [\text{\$abcdefghijklmnopqrstuvwxyz234567}[n \bmod 32]] \frown B(\left\lfloor n / 32 \right\rfloor, l - 1) &\text{otherwise}
 \end{cases}\\
-N(k) &\equiv "e" \frown B(\mathcal{E}_{32}^{-1}(k), 52)
+N(k) &\equiv \text{\$e} \frown B(\mathcal{E}_{32}^{-1}(k), 52)
 \end{align}
 ```
 
