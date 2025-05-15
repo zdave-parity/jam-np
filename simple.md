@@ -12,8 +12,8 @@ During the TLS handshake, both the client (the peer that initiated the connectio
 - Use Ed25519 as the signature algorithm.
 - Use the peer's Ed25519 key. If the peer is a validator, this key should have been published on
   chain.
-- Have a single alternative name, which must be a 53-character DNS name consisting of "e" followed
-  by the Ed25519 public key, base-32 encoded using the alphabet "abcdefghijklmnopqrstuvwxyz234567".
+- Have a single alternative name, which must be derived from the Ed25519 public key as per the
+  "alternative name" section below.
 
 The certificates _should_ be self-signed, however this is not required and need not be verified.
 
@@ -26,6 +26,21 @@ Encryption and authentication occur as usual in TLS:
 
 - Diffie-Hellman key exchange is used to produce an ephemeral encryption key.
 - Both peers sign the handshake transcript hash.
+
+### Alternative name
+
+Given an Ed25519 public key $k$ (an octet sequence of length 32), the alternative name $N(k)$
+should be computed as follows:
+
+```math
+\begin{align}
+B(n, l) &\equiv \begin{cases}
+    "" &\text{when } l = 0\\
+    "abcdefghijklmnopqrstuvwxyz234567"[n \bmod 32] \doubleplus B(\left\lfloor n / 32 \right\rfloor, l - 1) &\text{otherwise}
+\end{cases}\\
+N(k) &\equiv "e" \frown B(\mathcal{E}_{32}^{-1}(k), 52)
+\end{align}
+```
 
 ### ALPN
 
