@@ -42,6 +42,9 @@ N(k) &\equiv \text{\texttt{\$e}} \frown B(\mathcal{E}_{32}^{-1}(k), 52)
 \end{align}
 ```
 
+Where $\mathcal{E}_{32}^{-1}$ is the deserialization function for 256-bit unsigned integers,
+defined in the serialization codec appendix of the GP.
+
 ### ALPN
 
 The protocol name, version, and chain are identified using QUIC/TLS "ALPN" (Application Layer
