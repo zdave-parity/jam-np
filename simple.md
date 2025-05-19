@@ -88,7 +88,8 @@ credentials through submission of a valid work-package in order to retain their 
 At the beginning of a new epoch, validators should wait to apply connectivity changes until both:
 
 - The first block in the epoch has been finalized.
-- At least 2 minutes have elapsed since the beginning of the epoch.
+- At least $\text{max}(\left\lfloor E / 30 \right\rfloor, 1)$ slots have elapsed since the
+  beginning of the epoch (where $E$ is the number of slots in an epoch).
 
 This rule is intended to:
 
@@ -172,7 +173,7 @@ Ed25519 Signature = [u8; 64]
 Erasure-Root = [u8; 32]
 Shard Index = u16
 Bundle Shard = [u8]
-Segment Shard = [u8; 12]
+Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 2 with 6)
 ```
 
 ### Grid structure
@@ -301,8 +302,9 @@ Protocol 131 is used for the first step (generating validator to proxy validator
 used for the second step (proxy validator to all current validators). Both protocols look the same
 on the wire; the difference is only in which step they are used for.
 
-The first step should be performed one minute after the connectivity changes for a new epoch are
-applied. The index of the proxy validator for a ticket is determined by interpreting the last 4
+The first step should be performed $\text{max}(\left\lfloor E / 60 \right\rfloor, 1)$ slots after
+the connectivity changes for a new epoch are applied (where $E$ is the number of slots in an
+epoch). The index of the proxy validator for a ticket is determined by interpreting the last 4
 bytes of the ticket's VRF output as a big-endian unsigned integer, modulo the number of validators.
 The proxy validator is selected from the next epoch's validator list. If the generating validator
 is chosen as the proxy validator, then the first step should effectively be skipped and the
@@ -311,10 +313,11 @@ following section.
 
 Proxy validators should verify the proof of any ticket they receive, and verify that they are the
 correct proxy for the ticket. If these checks succeed, they should forward the ticket to all
-current validators. Forwarding should be delayed until 3 minutes after the application of
-connectivity changes, to avoid exposing the timing of the message from the generating validator.
-Forwarding should be evenly spaced out from this point until half-way through the Safrole lottery
-period. Forwarding may be stopped if the ticket is included in a finalized block.
+current validators. Forwarding should be delayed until $\text{max}(\left\lfloor E / 20
+\right\rfloor, 1)$ slots after the application of connectivity changes, to avoid exposing the
+timing of the message from the generating validator. Forwarding should be evenly spaced out from
+this point until half-way through the Safrole lottery period. Forwarding may be stopped if the
+ticket is included in a finalized block.
 
 If finality is running far enough behind that the state required to verify a received ticket is not
 known with certainty, the stream should be reset/stopped. This applies to both protocol 131 and
@@ -456,7 +459,7 @@ Where:
 - $i$ is the index of the shard assigned to the validator.
 - $c$ is the index of the core which produced the work-report.
 - $R$ is the recovery threshold: the minimum number of EC shards required to recover the original
-  data. With 1023 validators, $R = 342$.
+  data. With 1023 validators, $R = 342$. With 6 validators, $R = 2$.
 - $V$ is the number of validators.
 
 ### CE 137: Shard distribution
@@ -520,7 +523,7 @@ Auditor -> Assurer
 
 ### CE 139/140: Segment shard request
 
-Request for one or more 12-byte segment shards.
+Request for one or more segment shards.
 
 This protocol should be used by guarantors to request import segment shards from assurers in order
 to complete work-package bundles for guaranteeing.
@@ -553,7 +556,7 @@ the correctness of each response as it is received, requesting shards from a dif
 the case of an incorrect response. If the reconstructed segment and proof are still inconsistent,
 then it can be concluded that the erasure-root is invalid.
 
-The number of segment shards requested in a single stream should not exceed $2W_M$ ($W_M = 2^{11}$,
+The number of segment shards requested in a single stream should not exceed $2W_M$ ($W_M = 3072$,
 this constant is defined in the GP).
 
 ```
@@ -583,7 +586,7 @@ extrinsic is checked using the prior keysets, while the block seal is checked us
 keysets.
 
 ```
-Bitfield = [u8; 43] (One bit per core)
+Bitfield = [u8; ceil(C / 8)] (One bit per core; C is the total number of cores)
 Assurance = Header Hash (Anchor) ++ Bitfield ++ Ed25519 Signature
 
 Assurer -> Validator
