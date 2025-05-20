@@ -271,6 +271,32 @@ Node -> Node
 <-- FIN
 ```
 
+### CE 130: Justification request
+
+Request for justifications associated with a block.
+
+Justification Type is an enum where 0 is Grandpa and 1 is Beefy (not implemented yet).
+Encoded Justification is the encoding of the specific justification based on type. If the type is Grandpa then this decodes to Grandpa Justification.
+
+Votes Ancestries is the set of headers routing all precommit target blocks to the commit target block. In normal operation this will be empty as validators will vote for the same proposed block that will then be the committed block.
+
+```
+Signed Precommit = Precommit ++ Ed25519 Signature ++ Ed25519 Public
+Commit = Header Hash ++ Slot ++ len++[Signed Precommit]
+Votes Ancestries = len++[Header]
+Grandpa Justification = Round Number ++ Commit ++ Votes Ancestries
+
+Justification Type = 0 OR 1
+Encoded Justification = len++[u8]
+Justification = Justification Type ++ Encoded Justification
+Justifications = len++[Justification]
+
+--> Header Hash
+--> FIN
+<-- Justifications
+<-- FIN
+```
+
 ### CE 131/132: Safrole ticket distribution
 
 Sharing of a Safrole ticket for inclusion in a block.
