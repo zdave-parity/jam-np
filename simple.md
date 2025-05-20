@@ -149,6 +149,7 @@ Epoch Index = u32 (Slot / E)
 Validator Index = u16
 Core Index = u16
 
+Ed25519 Public = [u8; 32]
 Ed25519 Signature = [u8; 64]
 
 Erasure-Root = [u8; 32]
@@ -710,22 +711,17 @@ GRANDPA voter sets match validator sets for each epoch.
 This is sent by each voting validator to all other voting validators.
 
 ```
-Ed25519 Public = [u8; 32]
 Round Number = u64
 Set Id = u32
 Prevote = Header Hash ++ Slot
 Precommit = Header Hash ++ Slot
 PrimaryPropose = Header Hash ++ Slot
-Message = Enum {
-  0 = Prevote,
-  1 = Precommit,
-  2 = PrimaryPropose
-}
+Message = 0 ++ Prevote OR 1 ++ Precommit OR 2 ++ PrimaryPropose
 Signed Message = Message ++ Ed25519 Signature ++ Ed25519 Public
 
 Validator -> Validator
 
---> 0 ++ Round Number ++ Set Id ++ Signed Message
+--> Round Number ++ Set Id ++ Signed Message
 --> FIN
 <-- FIN
 ```
@@ -741,7 +737,7 @@ Compact Commit = Header Hash ++ Slot ++ Precommits ++ Multi Auth Data
 
 Validator -> Validator
 
---> 1 ++ Round Number ++ Set Id ++ Compact Commit
+--> Round Number ++ Set Id ++ Compact Commit
 --> FIN
 <-- FIN
 ```
@@ -753,24 +749,14 @@ This is sent by each voting validator to all other voting validators and informs
 ```
 Validator -> Validator
 
---> 2 ++ Round Number ++ Set Id ++ Slot
+--> Round Number ++ Set Id ++ Slot
 --> FIN
 <-- FIN
 ```
 
 ### CE 149: GRANDPA CatchUp
 
-Catchup Request. This is sent by a voting validator to another validator.
-
-```
-Validator -> Validator
-
---> 3 ++ Round Number ++ Set Id
---> FIN
-<-- FIN
-```
-
-Catchup Response. This includes all votes required to catch up state to that of the responding voter.
+Catchup Request. This is sent by a voting validator to another validator. The response includes all votes required to catch up state to that of the responding voter.
 
 ```
 Signed Prevote = Prevote ++ Ed25519 Signature ++ Ed25519 Public
@@ -781,7 +767,8 @@ Catchup = Round Number ++ len++[Signed Prevote] ++ len++[Signed Precommit] ++ Ba
 
 Validator -> Validator
 
---> 4 ++ Set Id ++ Catchup
+--> Round Number ++ Set Id
 --> FIN
+<-- Set Id ++ Catchup
 <-- FIN
 ```
