@@ -158,6 +158,21 @@ Bundle Shard = [u8]
 Segment Shard = [u8; 12]
 ```
 
+### Grandpa types
+
+Common types used in Grandpa and Justification request protocols.
+
+```
+Round Number = u64
+Set Id = u32
+Prevote = Header Hash ++ Slot
+Precommit = Header Hash ++ Slot
+PrimaryPropose = Header Hash ++ Slot
+Signed Prevote = Prevote ++ Ed25519 Signature ++ Ed25519 Public
+Signed Precommit = Precommit ++ Ed25519 Signature ++ Ed25519 Public
+Commit = Header Hash ++ Slot ++ len++[Signed Precommit]
+```
+
 ### Grid structure
 
 Primarily for the purpose of block and preimage announcements, the previous, current, and next
@@ -281,8 +296,6 @@ Encoded Justification is the encoding of the specific justification based on typ
 Votes Ancestries is the set of headers routing all precommit target blocks to the commit target block. In normal operation this will be empty as validators will vote for the same proposed block that will then be the committed block.
 
 ```
-Signed Precommit = Precommit ++ Ed25519 Signature ++ Ed25519 Public
-Commit = Header Hash ++ Slot ++ len++[Signed Precommit]
 Votes Ancestries = len++[Header]
 Grandpa Justification = Round Number ++ Commit ++ Votes Ancestries
 
@@ -737,11 +750,6 @@ GRANDPA voter sets match validator sets for each epoch.
 This is sent by each voting validator to all other voting validators.
 
 ```
-Round Number = u64
-Set Id = u32
-Prevote = Header Hash ++ Slot
-Precommit = Header Hash ++ Slot
-PrimaryPropose = Header Hash ++ Slot
 Message = 0 ++ Prevote OR 1 ++ Precommit OR 2 ++ PrimaryPropose
 Signed Message = Message ++ Ed25519 Signature ++ Ed25519 Public
 
@@ -785,8 +793,6 @@ Validator -> Validator
 Catchup Request. This is sent by a voting validator to another validator. The response includes all votes required to catch up state to that of the responding voter.
 
 ```
-Signed Prevote = Prevote ++ Ed25519 Signature ++ Ed25519 Public
-Signed Precommit = Precommit ++ Ed25519 Signature ++ Ed25519 Public
 Base Hash = Header Hash
 Base Number = Slot
 Catchup = Round Number ++ len++[Signed Prevote] ++ len++[Signed Precommit] ++ Base Hash ++ Base Number
