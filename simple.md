@@ -168,12 +168,28 @@ Epoch Index = u32 (Slot / E)
 Validator Index = u16
 Core Index = u16
 
+Ed25519 Public = [u8; 32]
 Ed25519 Signature = [u8; 64]
 
 Erasure-Root = [u8; 32]
 Shard Index = u16
 Bundle Shard = [u8]
 Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 2 with 6)
+```
+
+### Grandpa types
+
+Common types used in Grandpa and Justification request protocols.
+
+```
+Round Number = u64
+Set Id = u32
+Prevote = Header Hash ++ Slot
+Precommit = Header Hash ++ Slot
+PrimaryPropose = Header Hash ++ Slot
+Signed Prevote = Prevote ++ Ed25519 Signature ++ Ed25519 Public
+Signed Precommit = Precommit ++ Ed25519 Signature ++ Ed25519 Public
+Commit = Header Hash ++ Slot ++ len++[Signed Precommit]
 ```
 
 ### Grid structure
@@ -286,6 +302,30 @@ Node -> Node
 --> FIN
 <-- [Boundary Node]
 <-- [Key ++ Value]
+<-- FIN
+```
+
+### CE 130: Justification request
+
+Request for justifications associated with a block.
+
+Justification Type is an enum where 0 is Grandpa and 1 is Beefy (not implemented yet).
+Encoded Justification is the encoding of the specific justification based on type. If the type is Grandpa then this decodes to Grandpa Justification.
+
+Votes Ancestries is the set of headers routing all precommit target blocks to the commit target block. In normal operation this will be empty as validators will vote for the same proposed block that will then be the committed block.
+
+```
+Votes Ancestries = len++[Header]
+Grandpa Justification = Round Number ++ Commit ++ Votes Ancestries
+
+Justification Type = 0 OR 1
+Encoded Justification = len++[u8]
+Justification = Justification Type ++ Encoded Justification
+Justifications = len++[Justification]
+
+--> Header Hash
+--> FIN
+<-- Justifications
 <-- FIN
 ```
 
@@ -722,5 +762,66 @@ Auditor -> Validator
 
 --> Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature
 --> FIN
+<-- FIN
+```
+
+### CE 146: GRANDPA Vote
+
+GRANDPA voter sets match validator sets for each epoch.
+This is sent by each voting validator to all other voting validators.
+
+```
+Message = 0 ++ Prevote OR 1 ++ Precommit OR 2 ++ PrimaryPropose
+Signed Message = Message ++ Ed25519 Signature ++ Ed25519 Public
+
+Validator -> Validator
+
+--> Round Number ++ Set Id ++ Signed Message
+--> FIN
+<-- FIN
+```
+
+### CE 147: GRANDPA Commit
+
+This is sent by each voting validator to all other voting validators.
+
+```
+Precommits = len++[Precommit]
+Multi Auth Data = len++[Ed25519 Signature ++ Ed25519 Public]
+Compact Commit = Header Hash ++ Slot ++ Precommits ++ Multi Auth Data
+
+Validator -> Validator
+
+--> Round Number ++ Set Id ++ Compact Commit
+--> FIN
+<-- FIN
+```
+
+### CE 148: GRANDPA State
+
+This is sent by each voting validator to all other voting validators and informs them of the latest round it is participating in.
+
+```
+Validator -> Validator
+
+--> Round Number ++ Set Id ++ Slot
+--> FIN
+<-- FIN
+```
+
+### CE 149: GRANDPA CatchUp
+
+Catchup Request. This is sent by a voting validator to another validator. The response includes all votes required to catch up state to that of the responding voter.
+
+```
+Base Hash = Header Hash
+Base Number = Slot
+Catchup = Round Number ++ len++[Signed Prevote] ++ len++[Signed Precommit] ++ Base Hash ++ Base Number
+
+Validator -> Validator
+
+--> Round Number ++ Set Id
+--> FIN
+<-- Set Id ++ Catchup
 <-- FIN
 ```
