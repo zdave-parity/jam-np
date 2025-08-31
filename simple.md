@@ -765,13 +765,9 @@ Validator -> Validator
 This is sent by each voting validator to all other voting validators.
 
 ```
-Precommits = len++[Precommit]
-Multi Auth Data = len++[Ed25519 Signature ++ Ed25519 Public]
-Compact Commit = Header Hash ++ Slot ++ Precommits ++ Multi Auth Data
-
 Validator -> Validator
 
---> Round Number ++ Set Id ++ Compact Commit
+--> Round Number ++ Set Id ++ Commit
 --> FIN
 <-- FIN
 ```
