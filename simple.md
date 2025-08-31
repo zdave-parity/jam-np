@@ -786,7 +786,7 @@ Validator -> Validator
 
 ### CE 149: GRANDPA CatchUp
 
-Catchup Request. This is sent by a voting validator to another validator. The response includes all votes required to catch up state to that of the responding voter.
+Catchup Request. This is sent by a voting validator to another validator if the first validator determines that it is behind the other validator by a threshold number of rounds (currently set to 2 rounds). The response includes all votes from the last completed round of the responding validator. Base Hash and Base Number refer to the base, which is a block all vote targets are a descendent of. If the responding voter is unable to send the response it should stop the stream.
 
 ```
 Base Hash = Header Hash
@@ -797,6 +797,6 @@ Validator -> Validator
 
 --> Round Number ++ Set Id
 --> FIN
-<-- Set Id ++ Catchup
+<-- Catchup
 <-- FIN
 ```
