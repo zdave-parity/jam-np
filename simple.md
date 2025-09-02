@@ -179,18 +179,28 @@ Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 valid
 
 ### Grandpa types
 
-Common types used in Grandpa and Justification request protocols.
+Common types used in Grandpa protocols.
 
 ```
-Round Number = u64
 Set Id = u32
-Prevote = Header Hash ++ Slot
-Precommit = Header Hash ++ Slot
-PrimaryPropose = Header Hash ++ Slot
-Signed Prevote = Prevote ++ Ed25519 Signature ++ Ed25519 Public
-Signed Precommit = Precommit ++ Ed25519 Signature ++ Ed25519 Public
+Round Number = u64
+
+Vote = Header Hash ++ Slot
+
+Message Type = 0 (Prevote) OR 1 (Precommit) OR 2 (PrimaryPropose) (Single byte)
+Message = Message Type ++ Vote
+
+Message Signature = Ed25519 Signature for ("jam_grandpa_vote" ++ Message ++ Round Number ++ Set Id)
+
+Signed Message = Message ++ Message Signature ++ Ed25519 Public
+
+Signed Prevote = Vote ++ Message Signature ++ Ed25519 Public
+Signed Precommit = Vote ++ Message Signature ++ Ed25519 Public
+
 Commit = Header Hash ++ Slot ++ len++[Signed Precommit]
 ```
+
+Note that even though Commit does not specify the Set Id, it will only validate correctly with the correct Set Id as all the votes are signed with Set Id (see Message Signature).
 
 ### Grid structure
 
@@ -315,27 +325,21 @@ Node -> Node
 <-- FIN
 ```
 
-### CE 130: Justification request
+### CE 130: Grandpa justification request
 
-Request for justifications associated with a block.
-
-Justification Type is an enum where 0 is Grandpa and 1 is Beefy (not implemented yet).
-Encoded Justification is the encoding of the specific justification based on type. If the type is Grandpa then this decodes to Grandpa Justification.
+Request for the Grandpa justification associated with a block.
 
 Votes Ancestries is the set of headers routing all precommit target blocks to the commit target block. In normal operation this will be empty as validators will vote for the same proposed block that will then be the committed block.
+
+If the responding validator does not have the justification it should stop the stream.
 
 ```
 Votes Ancestries = len++[Header]
 Grandpa Justification = Round Number ++ Commit ++ Votes Ancestries
 
-Justification Type = 0 OR 1
-Encoded Justification = len++[u8]
-Justification = Justification Type ++ Encoded Justification
-Justifications = len++[Justification]
-
 --> Header Hash
 --> FIN
-<-- Justifications
+<-- Grandpa Justification
 <-- FIN
 ```
 
@@ -784,9 +788,6 @@ GRANDPA voter sets match validator sets for each epoch.
 This is sent by each voting validator to all other voting validators.
 
 ```
-Message = 0 ++ Prevote OR 1 ++ Precommit OR 2 ++ PrimaryPropose
-Signed Message = Message ++ Ed25519 Signature ++ Ed25519 Public
-
 Validator -> Validator
 
 --> Round Number ++ Set Id ++ Signed Message
