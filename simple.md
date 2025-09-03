@@ -177,7 +177,7 @@ Bundle Shard = [u8]
 Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 2 with 6)
 ```
 
-### Grandpa types
+### Grandpa
 
 Common types used in Grandpa protocols.
 
@@ -198,9 +198,22 @@ Signed Prevote = Vote ++ Message Signature ++ Ed25519 Public
 Signed Precommit = Vote ++ Message Signature ++ Ed25519 Public
 
 Commit = Header Hash ++ Slot ++ len++[Signed Precommit]
+
+Votes Ancestries = len++[Header]
+Grandpa Justification = Round Number ++ Set Id ++ Commit ++ Votes Ancestries
 ```
 
+GRANDPA voter sets match validator sets.
+
+Set Id starts at 0 at genesis and increments after each set change block is finalized. Hence in normal operation it increments with epoch index but it is not the same as epoch index (Skipped epochs are not included).
+
+Round Number resets to 0 when Set Id changes.
+
+Note that Signed Prevote and Signed Precommit are different in that the signature will be signed with a different Message Type (see Message Signature).
+
 Note that even though Commit does not specify the Set Id, it will only validate correctly with the correct Set Id as all the votes are signed with Set Id (see Message Signature).
+
+Grandpa Justification is something that when combined with a Header and proven authority set proves finality of a block. It does not include the Header as this is assumed to already be stored elsewhere. It does however include Headers for any auxiliary blocks that might be needed for routing all precommit target blocks to the commit target block. For example, these blocks might not exist in the canonical chain but were still voted on, hence the need to include the Header. This set of Headers is called the Votes Ancestries. In normal operation this will be empty as validators will vote for the same proposed block that will then be the committed block.
 
 ### Grid structure
 
@@ -327,15 +340,12 @@ Node -> Node
 
 ### CE 130: Grandpa justification request
 
-Request for the Grandpa justification associated with a block.
+Request for the Grandpa Justification associated with a block.
 
-Votes Ancestries is the set of headers routing all precommit target blocks to the commit target block. In normal operation this will be empty as validators will vote for the same proposed block that will then be the committed block.
-
-If the responding validator does not have the justification it should stop the stream.
+If the responding node does not have the justification it should stop the stream.
 
 ```
-Votes Ancestries = len++[Header]
-Grandpa Justification = Round Number ++ Commit ++ Votes Ancestries
+Node -> Node
 
 --> Header Hash
 --> FIN
@@ -784,7 +794,6 @@ Auditor -> Validator
 
 ### CE 146: GRANDPA Vote
 
-GRANDPA voter sets match validator sets for each epoch.
 This is sent by each voting validator to all other voting validators.
 
 ```
