@@ -171,9 +171,12 @@ Core Index = u16
 Ed25519 Public = [u8; 32]
 Ed25519 Signature = [u8; 64]
 
+Segments-Root = [u8; 32]
 Erasure-Root = [u8; 32]
 Shard Index = u16
+Work-Package Bundle = [u8] (Encoded as in GP)
 Bundle Shard = [u8]
+Segment = [u8; 4104]
 Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 2 with 6)
 ```
 
@@ -406,8 +409,9 @@ Submission of a work-package from a builder to a guarantor.
 The second message should contain all the extrinsic data referenced by the work-package, formatted
 as in work-package bundles, which are defined in the Computation of Work Results section of the GP.
 
-Note that the content of imported segments _should not_ be sent; it is the responsibility of the
-receiving guarantor to fetch this data from the availability system.
+Note that if the builder can provide the content of imported segments, CE 146 should be used to submit 
+the full work-package bundle. Otherwise it is the responsibility of the receiving guarantor to fetch 
+this data from the availability system.
 
 ```
 Work-Package = As in GP
@@ -417,6 +421,31 @@ Builder -> Guarantor
 
 --> Core Index ++ Work-Package
 --> [Extrinsic] (Message size should equal sum of extrinsic data lengths)
+--> FIN
+<-- FIN
+```
+
+### CE 146: Work-package bundle submission
+
+Submission of a complete work-package bundle from a builder to a guarantor.
+
+Note that the bundle parts are sent in separate messages to allow for authorizing the work-package before reading the rest of the bundle.
+
+The import proof corresponds to $\mathit{J}$ as defined in the gray paper.
+
+```
+Work-Package = As in GP
+Extrinsic = [u8]
+Import-Proof = len++[Hash]
+Segments-Root Mappings = len++[Work-Package Hash ++ Segments-Root]
+
+Builder -> Guarantor
+
+--> Core Index ++ Segments-Root Mappings
+--> Work-Package
+--> [Extrinsic] (Message size should equal sum of extrinsic data lengths)
+--> [Segment] (All imported segments)
+--> [Import-Proof] (Import proofs for all imported segments)
 --> FIN
 <-- FIN
 ```
@@ -450,9 +479,7 @@ mappings cannot be verified, the guarantor may, at their discretion, either refu
 work-package or blindly trust the mappings.
 
 ```
-Segments-Root = [u8; 32]
 Segments-Root Mappings = len++[Work-Package Hash ++ Segments-Root]
-Work-Package Bundle = As in GP
 
 Guarantor -> Guarantor
 
@@ -585,6 +612,21 @@ Auditor -> Assurer
 <-- FIN
 ```
 
+### CE 147: Bundle request
+
+Request for a work-package bundle.
+
+This protocol should be used by auditors to request work-package bundle from guarantors
+for auditing. In case the guarantor fails to provide the valid bundle, the auditor should fall back to recovering the bundle with CE 138
+```
+Auditor -> Guarantor
+
+--> Erasure-Root
+--> FIN
+<-- Work-Package Bundle
+<-- FIN
+```
+
 ### CE 139/140: Segment shard request
 
 Request for one or more segment shards.
@@ -635,6 +677,31 @@ Guarantor -> Assurer
 [Protocol 140 only] for each segment shard {
 [Protocol 140 only]     <-- Justification
 [Protocol 140 only] }
+<-- FIN
+```
+
+### CE 148: Segment request
+
+Request for one or more segments.
+
+This protocol should be used by guarantors or builders to request import segments from other guarantors in order
+to complete work-package bundles.
+
+The number of segments requested in a single stream should not exceed $W_M$ ($W_M = 3072$,
+this constant is defined in the GP).
+
+If the guarantor fails to return the valid data, the requestor should fall back to using CE 139/140
+
+```
+Segment Index = u16
+Import-Proof = len++[Hash]
+
+Guarantor -> Guarantor
+
+--> [Segments-Root ++ len++[Segment Index]]
+--> FIN
+<-- [Segment]
+<-- [Import-Proof]
 <-- FIN
 ```
 
@@ -698,7 +765,7 @@ is expected to be checked against a different database.
 ```
 Preimage = [u8]
 
-Node -> Node
+Validator -> Node
 
 --> Hash
 --> FIN
