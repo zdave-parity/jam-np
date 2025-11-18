@@ -859,7 +859,7 @@ Auditor -> Validator
 <-- FIN
 ```
 
-### CE 146: GRANDPA Vote
+### CE 149: GRANDPA Vote
 
 This is sent by each voting validator to all other voting validators.
 
@@ -871,7 +871,7 @@ Validator -> Validator
 <-- FIN
 ```
 
-### CE 147: GRANDPA Commit
+### CE 150: GRANDPA Commit
 
 This is sent by each voting validator to all other voting validators.
 
@@ -883,7 +883,7 @@ Validator -> Validator
 <-- FIN
 ```
 
-### CE 148: GRANDPA State
+### CE 151: GRANDPA State
 
 This is sent by each voting validator to all other voting validators and informs them of the latest round it is participating in.
 
@@ -895,7 +895,7 @@ Validator -> Validator
 <-- FIN
 ```
 
-### CE 149: GRANDPA CatchUp
+### CE 152: GRANDPA CatchUp
 
 Catchup Request. This is sent by a voting validator to another validator if the first validator determines that it is behind the other validator by a threshold number of rounds (currently set to 2 rounds). The response includes all votes from the last completed round of the responding validator. Base Hash and Base Number refer to the base, which is a block all vote targets are a descendent of. If the responding voter is unable to send the response it should stop the stream.
 
