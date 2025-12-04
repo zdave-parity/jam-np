@@ -178,6 +178,8 @@ Work-Package Bundle = [u8] (Encoded as in GP)
 Bundle Shard = [u8]
 Segment = [u8; 4104]
 Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 2 with 6)
+
+Posterior State Root Hash = [u8; 32]
 ```
 
 ### Grandpa
@@ -188,7 +190,9 @@ Common types used in Grandpa protocols.
 Set Id = u32
 Round Number = u64
 
-Vote = Header Hash ++ Slot
+Target = Header Hash ++ Posterior State Root Hash
+
+Vote = Target ++ Slot
 
 Message Type = 0 (Prevote) OR 1 (Precommit) OR 2 (PrimaryPropose) (Single byte)
 Message = Message Type ++ Vote
@@ -200,7 +204,7 @@ Signed Message = Message ++ Message Signature ++ Ed25519 Public
 Signed Prevote = Vote ++ Message Signature ++ Ed25519 Public
 Signed Precommit = Vote ++ Message Signature ++ Ed25519 Public
 
-Commit = Header Hash ++ Slot ++ len++[Signed Precommit]
+Commit = Target ++ Slot ++ len++[Signed Precommit]
 
 Votes Ancestries = len++[Header]
 Grandpa Justification = Round Number ++ Set Id ++ Commit ++ Votes Ancestries
@@ -213,6 +217,8 @@ GRANDPA voter sets match validator sets.
 Set Id starts at 0 at genesis and increments after each set change block is finalized. Hence in normal operation it increments with epoch index but it is not the same as epoch index (Skipped epochs are not included).
 
 Round Number resets to 0 when Set Id changes.
+
+The Target for votes is the header hash together with the posterior state root hash, as described in GP Section 19.
 
 Note that Signed Prevote and Signed Precommit are different in that the signature will be signed with a different Message Type (see Message Signature).
 
@@ -910,7 +916,7 @@ Validator -> Validator
 Catchup Request. This is sent by a voting validator to another validator if the first validator determines that it is behind the other validator by a threshold number of rounds (currently set to 2 rounds). The response includes all votes from the last completed round of the responding validator. Base Hash and Base Number refer to the base, which is a block all vote targets are a descendent of. If the responding voter is unable to send the response it should stop the stream.
 
 ```
-Base Hash = Header Hash
+Base Hash = Target
 Base Number = Slot
 Catchup = Round Number ++ len++[Signed Prevote] ++ len++[Signed Precommit] ++ Base Hash ++ Base Number
 
