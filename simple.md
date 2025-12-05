@@ -220,6 +220,13 @@ Round Number resets to 0 when Set Id changes.
 
 The Target for votes is the header hash together with the posterior state root hash, as described in GP Section 19.
 
+The primary for a given round is selected as follows
+```
+primary = V[round mod validators]
+where round is the round number, validators is the number of validators and V is the list of validators sorted by key
+```
+In normal operation the primary will not need to broadcast a primary proposal as the previous round estimate will be finalized.
+
 Note that Signed Prevote and Signed Precommit are different in that the signature will be signed with a different Message Type (see Message Signature).
 
 Note that even though Commit does not specify the Set Id, it will only validate correctly with the correct Set Id as all the votes are signed with Set Id (see Message Signature).
