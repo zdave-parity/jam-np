@@ -359,9 +359,9 @@ Note that if the builder can provide the content of imported segments, CE 146 sh
 the full work-package bundle. Otherwise it is the responsibility of the receiving guarantor to fetch 
 this data from the availability system.
 
-The initial message `Core Index ++ Work-Package` should be limited to `202 * 1024` bytes. This ensures
+The initial message `Core Index ++ Work-Package` should be limited to `2 + (200 * 1024)` bytes. This ensures
 that Guarantors can not be forced to download huge work packages, before they can check that the
-Work-Package is actually authorized. 
+Work-Package is actually authorized.
 
 ```
 Work-Package = As in GP
@@ -383,7 +383,8 @@ Note that the bundle parts are sent in separate messages to allow for authorizin
 
 The import proof corresponds to $\mathit{J}$ as defined in the gray paper.
 
-The initial message `Core Index ++ Segments-Root Mappings` should be limited to `2 + 3072 * 2 * 32` bytes.
+The initial message `Core Index ++ Segments-Root Mappings` should be limited to `2 + 1 + (8 * 64)` bytes.
+The number of mappings cannot exceed the maximum number of dependencies ($\mathit{J}$ in the GP).
 The `Work-Package` message should be limited to `200 * 1024` bytes. This ensures that Guarantors can not be
 forced to download huge work packages, before they can check that the Work-Package is actually authorized. 
 
