@@ -379,14 +379,10 @@ Builder -> Guarantor
 
 Submission of a complete work-package bundle from a builder to a guarantor.
 
-Note that the bundle parts are sent in separate messages to allow for authorizing the work-package before reading the rest of the bundle.
-
-The import proof corresponds to $\mathit{J}$ as defined in the gray paper.
-
-The initial message `Core Index ++ Segments-Root Mappings` should be limited to `2 + 1 + (8 * 64)` bytes.
-The number of mappings cannot exceed the maximum number of dependencies ($\mathit{J}$ in the GP).
-The `Work-Package` message should be limited to `200 * 1024` bytes. This ensures that Guarantors can not be
-forced to download huge work packages, before they can check that the Work-Package is actually authorized. 
+Note that the bundle parts are sent in separate messages to allow for authorizing the work-package before
+reading the rest of the bundle. The `Work-Package` message should be limited to `200 * 1024` bytes. This
+ensures that Guarantors can not be forced to download huge work packages, before they can check that the
+Work-Package is actually authorized.
 
 ```
 Work-Package = As in GP
