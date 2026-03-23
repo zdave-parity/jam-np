@@ -384,6 +384,8 @@ reading the rest of the bundle. The `Work-Package` message should be limited to 
 ensures that Guarantors can not be forced to download huge work packages, before they can check that the
 Work-Package is actually authorized.
 
+The import proof corresponds to $\mathit{J}$ as defined in the gray paper.
+
 ```
 Work-Package = As in GP
 Extrinsic = [u8]
