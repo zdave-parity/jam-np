@@ -168,6 +168,7 @@ Epoch Index = u32 (Slot / E)
 Validator Index = u16
 Core Index = u16
 
+Ed25519 Public = [u8; 32]
 Ed25519 Signature = [u8; 64]
 
 Segments-Root = [u8; 32]
@@ -177,7 +178,69 @@ Work-Package Bundle = [u8] (Encoded as in GP)
 Bundle Shard = [u8]
 Segment = [u8; 4104]
 Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 2 with 6)
+
+Posterior State Root Hash = [u8; 32]
 ```
+
+### Grandpa
+
+Common types used in Grandpa protocols.
+
+```
+Set Id = u32
+Round Number = u64
+
+Target = Header Hash ++ Posterior State Root Hash
+
+Vote = Target ++ Slot
+
+Message Type = 0 (Prevote) OR 1 (Precommit) OR 2 (PrimaryPropose) (Single byte)
+Message = Message Type ++ Vote
+
+Message Signature = Ed25519 Signature for ("jam_grandpa_vote" ++ Message ++ Round Number ++ Set Id)
+
+Signed Message = Message ++ Message Signature ++ Ed25519 Public
+
+Signed Prevote = Vote ++ Message Signature ++ Ed25519 Public
+Signed Precommit = Vote ++ Message Signature ++ Ed25519 Public
+
+Commit = Target ++ Slot ++ len++[Signed Precommit]
+
+Votes Ancestries = len++[Header]
+Grandpa Justification = Round Number ++ Set Id ++ Commit ++ Votes Ancestries
+
+Warp Sync Fragment = Header ++ Grandpa Justification
+```
+
+GRANDPA voter sets match validator sets.
+
+Set Id starts at 0 at genesis and increments after each set change block is finalized. Hence in normal operation it increments with epoch index but it is not the same as epoch index (Skipped epochs are not included).
+
+Round Number resets to 0 when Set Id changes.
+Note that the genesis block is assumed to have been finalized on round 0 so Set 0 actually starts voting on round number 1.
+
+The Target for votes is the header hash together with the posterior state root hash, as described in GP Section 19.
+
+The primary for a given round is selected as follows
+```
+primary = V[round mod validators]
+where round is the round number, validators is the number of validators and V is the list of validators sorted by key
+```
+In normal operation the primary will not need to broadcast a primary proposal as the previous round estimate will be finalized.
+
+Note that Signed Prevote and Signed Precommit are different in that the signature will be signed with a different Message Type (see Message Signature).
+
+Note that even though Commit does not specify the Set Id, it will only validate correctly with the correct Set Id as all the votes are signed with Set Id (see Message Signature).
+
+Grandpa Justification is something that when combined with a Header and proven validator set proves finality of a block. It does not include the Header as this is assumed to already be stored elsewhere. It does however include Headers for any auxiliary blocks that might be needed for routing all precommit target blocks to the commit target block. For example, these blocks might not exist in the canonical chain but were still voted on, hence the need to include the Header. This set of Headers is called the Votes Ancestries. In normal operation this will be empty as validators will vote for the same proposed block that will then be the committed block.
+
+A Warp Sync Fragment is simply a Header and Grandpa Justification for a block that instigates a validator set change. These are used to quickly prove finality. It includes the Header so that a chain of Warp Sync Fragments is all that is needed to prove finality up to the latest validator set. One Warp Sync Fragment will exist for each block that instigates a set change and they will be ordered by and indexed by Set Id. In normal operation the first block of a new epoch is a set change block. The Warp Sync Fragment with index (Set ID) 0 provides proof of finality for the first set change block after genesis.
+A syncing node can quickly prove finality by doing the following:
+* Step 1: Send warp sync requests to peers until all fragments have been downloaded
+* Step 2: Prove finality of the next set change block using the next fragment and the current validator set (The very first fragment will be Set Id 0 with genesis validator set).
+* Step 3: Proving finality of the block also proves the set change. Change current validator set based on the marker in the change block header.
+
+Repeat steps 2 and 3 until the latest set has been proven. At this point a Grandpa Justification for the latest block can be requested and finality can be proven using the latest set.
 
 ### Grid structure
 
@@ -299,6 +362,21 @@ Node -> Node
 --> FIN
 <-- [Boundary Node]
 <-- [Key ++ Value]
+<-- FIN
+```
+
+### CE 130: Grandpa justification request
+
+Request for the Grandpa Justification associated with a block.
+
+If the responding node does not have the justification it should stop the stream.
+
+```
+Node -> Node
+
+--> Header Hash
+--> FIN
+<-- Grandpa Justification
 <-- FIN
 ```
 
@@ -815,5 +893,73 @@ Auditor -> Validator
 --> Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature
 --> Guarantee [Optional, this message is present if and only if Validity == 0]
 --> FIN
+<-- FIN
+```
+
+### CE 149: GRANDPA Vote
+
+This is sent by each voting validator to all other voting validators.
+
+```
+Validator -> Validator
+
+--> Round Number ++ Set Id ++ Signed Message
+--> FIN
+<-- FIN
+```
+
+### CE 150: GRANDPA Commit
+
+This is sent by each voting validator to all other voting validators.
+
+```
+Validator -> Validator
+
+--> Round Number ++ Set Id ++ Commit
+--> FIN
+<-- FIN
+```
+
+### CE 151: GRANDPA State
+
+This is sent by each voting validator to all other voting validators and informs them of the latest round it is participating in.
+
+```
+Validator -> Validator
+
+--> Round Number ++ Set Id ++ Slot
+--> FIN
+<-- FIN
+```
+
+### CE 152: GRANDPA CatchUp
+
+Catchup Request. This is sent by a voting validator to another validator if the first validator determines that it is behind the other validator by a threshold number of rounds (currently set to 2 rounds). The response includes all votes from the last completed round of the responding validator. Base Hash and Base Number refer to the base, which is a block all vote targets are a descendent of. If the responding voter is unable to send the response it should stop the stream.
+
+```
+Base Hash = Target
+Base Number = Slot
+Catchup = Round Number ++ len++[Signed Prevote] ++ len++[Signed Precommit] ++ Base Hash ++ Base Number
+
+Validator -> Validator
+
+--> Round Number ++ Set Id
+--> FIN
+<-- Catchup
+<-- FIN
+```
+
+### CE 153: Warp Sync Request
+
+A request for a number of warp sync fragments starting at (and including) a given set id.
+The responding node should return as many sequential warp sync fragments as it can until the latest set has been reached or the message size is too big.
+If the responding node is unable to respond it should stop the stream.
+
+```
+Node -> Node
+
+--> Set Id
+--> FIN
+<-- len++[Warp Sync Fragment]
 <-- FIN
 ```
