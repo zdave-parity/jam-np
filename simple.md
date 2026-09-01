@@ -49,7 +49,7 @@ defined in the serialization codec appendix of the GP.
 
 The protocol name, version, and chain are identified using QUIC/TLS "ALPN" (Application Layer
 Protocol Negotiation). The (ASCII-encoded) protocol identifier should be either `jamnp-s/V/H` or
-`jamnp-s/V/H/builder`. Here `V` is the protocol version, `0`, and `H` is the first 8 nibbles of the
+`jamnp-s/V/H/builder`. Here `V` is the protocol version, `1`, and `H` is the first 8 nibbles of the
 hash of the chain's genesis header, in lower-case hexadecimal.
 
 The `/builder` suffix should always be permitted by the side accepting the connection, but only
@@ -435,11 +435,10 @@ that all guarantors build and sign the same work-report.
 The guarantor receiving the work-package bundle should perform basic verification first and then
 execute the refine logic, returning the hash of the resulting work-report and a signature that can
 be included in a guaranteed work-report. The basic verification should include checking that the
-shard count is acceptable, checking the validity of the authorization, and checking the
-work-package hash to segments-root mappings. The shard count check may be somewhat relaxed; for
-example, a count matching the active validator count of either the current or the next epoch may
-be accepted. If the mappings cannot be verified, the guarantor may, at their discretion, either
-refuse to refine the work-package or blindly trust the mappings.
+shard count is acceptable (as defined above), checking the validity of the authorization, and
+checking the work-package hash to segments-root mappings. If the mappings cannot be verified, the
+guarantor may, at their discretion, either refuse to refine the work-package or blindly trust the
+mappings.
 
 ```
 Shard Count = u16
