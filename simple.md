@@ -424,19 +424,30 @@ as the work-package and extrinsic data. The bundle should precisely match the on
 ultimately erasure coded and made available in the case where the work-report gets included on
 chain.
 
+The first message contains the number of erasure-coded shards to generate for the bundle. One
+shard is produced per validator, and a work-report can only be included on chain if its shard
+count matches the number of active validators at inclusion, so the sharing guarantor should pick
+the active validator count expected at the earliest slot at which the resulting work-report could
+be included (e.g. the slot after the current one according to the node's wall clock). The shard
+count determines the erasure-root and thus the work-report hash; sending it explicitly ensures
+that all guarantors build and sign the same work-report.
+
 The guarantor receiving the work-package bundle should perform basic verification first and then
 execute the refine logic, returning the hash of the resulting work-report and a signature that can
-be included in a guaranteed work-report. The basic verification should include checking the
-validity of the authorization and checking the work-package hash to segments-root mappings. If the
-mappings cannot be verified, the guarantor may, at their discretion, either refuse to refine the
-work-package or blindly trust the mappings.
+be included in a guaranteed work-report. The basic verification should include checking that the
+shard count is acceptable, checking the validity of the authorization, and checking the
+work-package hash to segments-root mappings. The shard count check may be somewhat relaxed; for
+example, a count matching the active validator count of either the current or the next epoch may
+be accepted. If the mappings cannot be verified, the guarantor may, at their discretion, either
+refuse to refine the work-package or blindly trust the mappings.
 
 ```
+Shard Count = u16
 Segments-Root Mappings = len++[Work-Package Hash ++ Segments-Root]
 
 Guarantor -> Guarantor
 
---> Core Index ++ Segments-Root Mappings
+--> Core Index ++ Shard Count ++ Segments-Root Mappings
 --> Work-Package Bundle
 --> FIN
 <-- Work-Report Hash ++ Ed25519 Signature
