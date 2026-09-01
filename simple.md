@@ -426,11 +426,15 @@ chain.
 
 The first message contains the number of erasure-coded shards to generate for the bundle. One
 shard is produced per validator, and a work-report can only be included on chain if its shard
-count matches the number of active validators at inclusion, so the sharing guarantor should pick
-the active validator count expected at the earliest slot at which the resulting work-report could
-be included (e.g. the slot after the current one according to the node's wall clock). The shard
-count determines the erasure-root and thus the work-report hash; sending it explicitly ensures
-that all guarantors build and sign the same work-report.
+count matches the number of active validators at inclusion. The shard count determines the
+erasure-root and thus the work-report hash; sending it explicitly ensures that all guarantors
+build and sign the same work-report.
+
+A shard count is acceptable if it matches the number of active validators at a slot in which the
+work-report could possibly be included on chain, judging by the anchor and assuming one block per
+slot. As a work-report can only be included while its anchor is within the recent history, these
+are the $H$ slots following the anchor slot (where $H$ is the size of the recent history, in
+blocks). The sharing guarantor may pick any acceptable shard count.
 
 The guarantor receiving the work-package bundle should perform basic verification first and then
 execute the refine logic, returning the hash of the resulting work-report and a signature that can
