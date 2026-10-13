@@ -567,10 +567,13 @@ The justification should be the co-path of the path from the erasure-root to the
 should construct this by appending the corresponding segment shard root to the justification
 received via CE 137.
 
+This protocol may also be used by non-validator nodes to recover work-package bundles. Assurers may
+throttle requests from non-validator nodes.
+
 ```
 Justification = [0 ++ Hash OR 1 ++ Hash ++ Hash] (Each discriminator is a single byte)
 
-Auditor -> Assurer
+Node -> Assurer
 
 --> Erasure-Root ++ Shard Index
 --> FIN
