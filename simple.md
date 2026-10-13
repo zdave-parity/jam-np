@@ -517,7 +517,7 @@ Where:
 - $i$ is the index of the shard assigned to the validator.
 - $c$ is the index of the core which produced the work-report.
 - $R$ is the recovery threshold: the minimum number of EC shards required to recover the original
-  data. With 1023 validators, $R = 342$. With 6 validators, $R = 2$.
+  data. With 1023 validators, $R = 342$. With 6 validators, $R = 3$.
 - $V$ is the number of validators.
 
 ### CE 137: Shard distribution
