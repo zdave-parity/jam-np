@@ -747,50 +747,36 @@ Validator -> Node
 
 Announcement of requirement to audit.
 
-Auditors of a block (defined to be the prior validator set) should, at the beginning of each
-tranche, broadcast an announcement to all other such auditors specifying which work-reports they
-intend to audit, unless they do not intend to audit any work-reports, in which case no announcement
-should be sent.
-
-If an auditor determines, after the beginning of a tranche, additional work-reports that they
-should audit, they should broadcast additional announcements covering these work-reports. This
-situation can occur if an announcement for the previous tranche arrives late, and no corresponding
-judgment has been received.
+Auditors of a block (defined to be the prior validator set) must broadcast an announcement to
+all other such auditors whenever they become required to audit work-reports which they have not
+yet announced, as defined in the GP. Work-reports audited as a result of receiving a negative
+judgment are not announced.
 
 An auditor should never announce intent to audit a particular work-report, in the context of a
 particular block, in more than one tranche.
 
-An announcement contains a list of work-reports as well as evidence backing up the announcer's
-decision to audit them. In combination with the block being audited and the prior state, the
-evidence should be sufficient for recipients of the announcement to verify the audit requirement
-claim.
+The announcement represents the intent to audit one or more work-reports of a block, identified by
+the block's header hash and the work-reports' cores, and includes the Bandersnatch signature
+from which the requirement to audit is derived. There are two kinds of announcements:
 
-The evidence provided for a tranche 0 announcement is simply the Bandersnatch signature from which
-the list of work-reports to audit was derived. For subsequent tranche announcements, separate
-evidence is provided for each announced work-report. This evidence consists of:
+- Initial tranche (0): the signature is $s_0$ in the GP. The announcer intends to audit a subset
+  of the work-reports selected by the signature ($\mathbf{a}_0$ in the GP). It contains a bitfield
+  which indicates the cores of these work-reports.
+- Later tranche: the signature is $S(w)$ in the GP. The announcer intends to audit the work-report
+  $w$ on the given core.
 
-- A Bandersnatch signature, $s_n(w)$ in the GP.
-- A list of announcements from the previous tranche, each declaring intent to audit the work-report
-  in question. Inclusion of an announcement in this list is a claim that no corresponding judgment
-  for the work-report in question was received (this cannot be proven and so must simply be
-  accepted). Each announcement in the list thus corresponds to a "no-show" and the length of the
-  list is the claimed number of no-shows. No two announcements in the list should be from the same
-  auditor.
+Given the block being audited, the prior state and the signature, it is sufficient for recipients
+of the announcement to verify the audit requirement claim.
 
 ```
-Tranche = u8
-Announcement = len++[Core Index ++ Work-Report Hash] ++ Ed25519 Signature
-
+Core Bitfield = [u8; ceil(C / 8)] (One bit per core; C is the total number of cores)
 Bandersnatch Signature = [u8; 96]
-First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
-No-Show = Validator Index ++ Announcement (From the previous tranche)
-Subsequent Tranche Evidence = [Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]] (One entry per announced work-report)
-Evidence = First Tranche Evidence (If tranche is 0) OR Subsequent Tranche Evidence (If tranche is not 0)
+Intent = 0 ++ Core Bitfield (Initial tranche) OR 1 ++ Core Index (Later tranche) (1 byte discriminator)
+Announcement = Header Hash ++ Validator Index ++ Intent ++ Bandersnatch Signature (s_0 in GP for the initial tranche, S(w) in GP for a later tranche)
 
 Auditor -> Auditor
 
---> Header Hash ++ Tranche ++ Announcement
---> Evidence
+--> [Announcement]
 --> FIN
 <-- FIN
 ```
