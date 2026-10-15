@@ -756,12 +756,13 @@ The announcement represents the intent to audit one or more work-reports of a bl
 the block's header hash and the work-reports' cores, and includes the Bandersnatch signature
 from which the requirement to audit is derived. There are two kinds of announcements:
 
-- Initial tranche(0): the signature is $s_0$ in the GP. The announcer intends to audit a subset of
-  the work-reports selected by the signature ($\mathbf{a}_0$ in the GP); It contains a bitfield which indicates the cores of these work-reports.
+- Initial tranche (0): the signature is $s_0$ in the GP. The announcer intends to audit a subset
+  of the work-reports selected by the signature ($\mathbf{a}_0$ in the GP). It contains a bitfield
+  which indicates the cores of these work-reports.
 - Later tranche: the signature is $S(w)$ in the GP. The announcer intends to audit the work-report
   $w$ on the given core.
 
-Given the block being audited, the prior state and the signature it is sufficientfor recipients
+Given the block being audited, the prior state and the signature, it is sufficient for recipients
 of the announcement to verify the audit requirement claim.
 
 ```
