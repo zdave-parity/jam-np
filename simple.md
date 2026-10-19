@@ -759,8 +759,8 @@ from which the requirement to audit is derived. There are two kinds of announcem
 - Initial tranche (0): the signature is $s_0$ in the GP. The announcer intends to audit a subset
   of the work-reports selected by the signature ($\mathbf{a}_0$ in the GP). It contains a bitfield
   which indicates the cores of these work-reports.
-- Later tranche: the signature is $S(w)$ in the GP. The announcer intends to audit the work-report
-  $w$ on the given core.
+- Later tranche: the signature is $S(\mathbf{r})$ in the GP. The announcer intends to audit the
+  work-report $\mathbf{r}$ on the given core.
 
 Given the block being audited, the prior state and the signature, it is sufficient for recipients
 of the announcement to verify the audit requirement claim.
@@ -769,7 +769,7 @@ of the announcement to verify the audit requirement claim.
 Core Bitfield = [u8; ceil(C / 8)] (One bit per core; C is the total number of cores)
 Bandersnatch Signature = [u8; 96]
 Intent = 0 ++ Core Bitfield (Initial tranche) OR 1 ++ Core Index (Later tranche) (1 byte discriminator)
-Announcement = Header Hash ++ Validator Index ++ Intent ++ Bandersnatch Signature (s_0 in GP for the initial tranche, S(w) in GP for a later tranche)
+Announcement = Header Hash ++ Validator Index ++ Intent ++ Bandersnatch Signature (s_0 in GP for the initial tranche, S(r) in GP for a later tranche)
 
 Auditor -> Auditor
 
