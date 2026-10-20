@@ -805,15 +805,19 @@ On receipt of a new negative judgment for a work-report that the node is respons
 A negative judgement should include the guarantees supporting the report. This is not needed for positive judgements.
 The guarantees is a bounded vector of at most 3 elements, preceded by the guarantees' slot.
 
+Multiple judgments may be sent in a single message. Each judgment is self-contained and carries the
+index of the auditor that issued it, so judgments from different auditors, work-reports and epochs
+may be batched together, e.g. when forwarding judgments received from other auditors.
+
 ```
 Validity = 0 (Invalid) OR 1 (Valid) (Single byte)
 GuaranteeSignature = Validator Index ++ Ed25519 Signature
 Guarantee = Slot ++ len++[GuaranteeSignature] (2 or 3 elements only)
+Judgment = Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature ++ Guarantee (Present if and only if Validity == 0)
 
 Auditor -> Validator
 
---> Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature
---> Guarantee [Optional, this message is present if and only if Validity == 0]
+--> [Judgment]
 --> FIN
 <-- FIN
 ```
