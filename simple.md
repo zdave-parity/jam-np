@@ -762,8 +762,12 @@ from which the requirement to audit is derived. There are two kinds of announcem
 - Later tranche: the signature is $S(\mathbf{r})$ in the GP. The announcer intends to audit the
   work-report $\mathbf{r}$ on the given core.
 
-Given the block being audited, the prior state and the signature, it is sufficient for recipients
-of the announcement to verify the audit requirement claim.
+Given the block being audited, the prior state and the signature, recipients of the
+announcement are able to verify the audit requirement claim. The tranche is not declared in the
+announcement. For a later tranche announcement, recipients should verify the signature and then
+derive the tranche from its VRF output ($C(\mathbf{r})$ in the GP).
+
+Multiple announcements may be sent in a single message.
 
 ```
 Core Bitfield = [u8; ceil(C / 8)] (One bit per core; C is the total number of cores)
@@ -805,8 +809,8 @@ On receipt of a new negative judgment for a work-report that the node is respons
 A negative judgement should include the guarantees supporting the report. This is not needed for positive judgements.
 The guarantees is a bounded vector of at most 3 elements, preceded by the guarantees' slot.
 
-Multiple judgments may be sent in a single message. Judgments from different auditors, work-reports and epochs
-may be batched together.
+Multiple judgments may be sent in a single message. Judgments from different auditors, work-reports
+and epochs may be batched together.
 
 ```
 Validity = 0 (Invalid) OR 1 (Valid) (Single byte)
