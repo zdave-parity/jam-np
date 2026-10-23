@@ -753,12 +753,12 @@ An auditor should never announce intent to audit a particular work-report, in th
 particular block, in more than one tranche.
 
 The announcement represents the intent to audit one or more work-reports of a block, identified by
-the block's header hash and the work-reports' cores, and includes the Bandersnatch signature
-from which the requirement to audit is derived. There are two kinds of announcements:
+the block's header hash, and includes the Bandersnatch signature from which the requirement to
+audit is derived. There are two kinds of announcements:
 
-- Initial tranche (0): the signature is $s_0$ in the GP. The announcer intends to audit a subset
-  of the work-reports selected by the signature ($\mathbf{a}_0$ in the GP). It contains a bitfield
-  which indicates the cores of these work-reports.
+- Initial tranche (0): the signature is $s_0$ in the GP. The announcer intends to audit the
+  work-reports selected by the signature ($\mathbf{a}_0$ in the GP). Their cores are not declared,
+  recipients derive them from the signature.
 - Later tranche: the signature is $S(\mathbf{r})$ in the GP. The announcer intends to audit the
   work-report $\mathbf{r}$ on the given core.
 
@@ -770,9 +770,8 @@ derive the tranche from its VRF output ($C(\mathbf{r})$ in the GP).
 Multiple announcements may be sent in a single message.
 
 ```
-Core Bitfield = [u8; ceil(C / 8)] (One bit per core; C is the total number of cores)
 Bandersnatch Signature = [u8; 96]
-Intent = 0 ++ Core Bitfield (Initial tranche) OR 1 ++ Core Index (Later tranche) (1 byte discriminator)
+Intent = 0 (Initial tranche) OR 1 ++ Core Index (Later tranche) (1 byte discriminator)
 Announcement = Header Hash ++ Validator Index ++ Intent ++ Bandersnatch Signature (s_0 in GP for the initial tranche, S(r) in GP for a later tranche)
 
 Auditor -> Auditor
@@ -813,10 +812,10 @@ Multiple judgments may be sent in a single message. Judgments from different aud
 and epochs may be batched together.
 
 ```
-Validity = 0 (Invalid) OR 1 (Valid) (Single byte)
 GuaranteeSignature = Validator Index ++ Ed25519 Signature
 Guarantee = Slot ++ len++[GuaranteeSignature] (2 or 3 elements only)
-Judgment = Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature ++ Guarantee (Present if and only if Validity == 0)
+Validity = 0 ++ Guarantee (Invalid) OR 1 (Valid) (1 byte discriminator)
+Judgment = Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature
 
 Auditor -> Validator
 
