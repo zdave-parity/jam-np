@@ -747,50 +747,39 @@ Validator -> Node
 
 Announcement of requirement to audit.
 
-Auditors of a block (defined to be the prior validator set) should, at the beginning of each
-tranche, broadcast an announcement to all other such auditors specifying which work-reports they
-intend to audit, unless they do not intend to audit any work-reports, in which case no announcement
-should be sent.
-
-If an auditor determines, after the beginning of a tranche, additional work-reports that they
-should audit, they should broadcast additional announcements covering these work-reports. This
-situation can occur if an announcement for the previous tranche arrives late, and no corresponding
-judgment has been received.
+Auditors of a block (defined to be the prior validator set) must broadcast an announcement to
+all other such auditors whenever they become required to audit work-reports which they have not
+yet announced, as defined in the GP. Work-reports audited as a result of receiving a negative
+judgment are not announced.
 
 An auditor should never announce intent to audit a particular work-report, in the context of a
 particular block, in more than one tranche.
 
-An announcement contains a list of work-reports as well as evidence backing up the announcer's
-decision to audit them. In combination with the block being audited and the prior state, the
-evidence should be sufficient for recipients of the announcement to verify the audit requirement
-claim.
+The announcement represents the intent to audit one or more work-reports of a block, identified by
+the block's header hash, and includes the Bandersnatch signature from which the requirement to
+audit is derived. There are two kinds of announcements:
 
-The evidence provided for a tranche 0 announcement is simply the Bandersnatch signature from which
-the list of work-reports to audit was derived. For subsequent tranche announcements, separate
-evidence is provided for each announced work-report. This evidence consists of:
+- Initial tranche (0): the signature is $s_0$ in the GP. The announcer intends to audit the
+  work-reports selected by the signature ($\mathbf{a}_0$ in the GP). Their cores are not declared,
+  recipients derive them from the signature.
+- Later tranche: the signature is $S(\mathbf{r})$ in the GP. The announcer intends to audit the
+  work-report $\mathbf{r}$ on the given core.
 
-- A Bandersnatch signature, $s_n(w)$ in the GP.
-- A list of announcements from the previous tranche, each declaring intent to audit the work-report
-  in question. Inclusion of an announcement in this list is a claim that no corresponding judgment
-  for the work-report in question was received (this cannot be proven and so must simply be
-  accepted). Each announcement in the list thus corresponds to a "no-show" and the length of the
-  list is the claimed number of no-shows. No two announcements in the list should be from the same
-  auditor.
+Given the block being audited, the prior state and the signature, recipients of the
+announcement are able to verify the audit requirement claim. The tranche is not declared in the
+announcement. For a later tranche announcement, recipients should verify the signature and then
+derive the tranche from its VRF output ($C(\mathbf{r})$ in the GP).
+
+Multiple announcements may be sent in a single message.
 
 ```
-Tranche = u8
-Announcement = len++[Core Index ++ Work-Report Hash] ++ Ed25519 Signature
-
 Bandersnatch Signature = [u8; 96]
-First Tranche Evidence = Bandersnatch Signature (s_0 in GP)
-No-Show = Validator Index ++ Announcement (From the previous tranche)
-Subsequent Tranche Evidence = [Bandersnatch Signature (s_n(w) in GP) ++ len++[No-Show]] (One entry per announced work-report)
-Evidence = First Tranche Evidence (If tranche is 0) OR Subsequent Tranche Evidence (If tranche is not 0)
+Intent = 0 (Initial tranche) OR 1 ++ Core Index (Later tranche) (1 byte discriminator)
+Announcement = Header Hash ++ Validator Index ++ Intent ++ Bandersnatch Signature (s_0 in GP for the initial tranche, S(r) in GP for a later tranche)
 
 Auditor -> Auditor
 
---> Header Hash ++ Tranche ++ Announcement
---> Evidence
+--> [Announcement]
 --> FIN
 <-- FIN
 ```
@@ -822,15 +811,18 @@ On receipt of a new negative judgment for a work-report that the node is respons
 A negative judgement should include the guarantees supporting the report. This is not needed for positive judgements.
 The guarantees is a bounded vector of at most 3 elements, preceded by the guarantees' slot.
 
+Multiple judgments may be sent in a single message. Judgments from different auditors, work-reports
+and epochs may be batched together.
+
 ```
-Validity = 0 (Invalid) OR 1 (Valid) (Single byte)
 GuaranteeSignature = Validator Index ++ Ed25519 Signature
 Guarantee = Slot ++ len++[GuaranteeSignature] (2 or 3 elements only)
+Validity = 0 ++ Guarantee (Invalid) OR 1 (Valid) (1 byte discriminator)
+Judgment = Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature
 
 Auditor -> Validator
 
---> Epoch Index ++ Validator Index ++ Validity ++ Work-Report Hash ++ Ed25519 Signature
---> Guarantee [Optional, this message is present if and only if Validity == 0]
+--> [Judgment]
 --> FIN
 <-- FIN
 ```
