@@ -160,7 +160,7 @@ The following "common" types are used in multiple protocols.
 ```
 Header = As in GP
 Work-Report = As in GP
-Hash = Header Hash = Work-Report Hash = [u8; 32]
+Hash = Header Hash = Work-Report Hash = Work-Package Hash = [u8; 32]
 
 Slot = u32
 Epoch Index = u32 (Slot / E)
@@ -176,7 +176,7 @@ Shard Index = u16
 Work-Package Bundle = [u8] (Encoded as in GP)
 Bundle Shard = [u8]
 Segment = [u8; 4104]
-Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 2 with 6)
+Segment Shard = [u8; 4104 / R] (R is the recovery threshold; 342 with 1023 validators, 3 with 6)
 ```
 
 ### Grid structure
@@ -353,7 +353,7 @@ Validator -> Validator
 Submission of a work-package from a builder to a guarantor.
 
 The second message should contain all the extrinsic data referenced by the work-package, formatted
-as in work-package bundles, which are defined in the Computation of Work Results section of the GP.
+as in work-package bundles, which are defined in the Computation of Work-Report section of the GP.
 
 Note that if the builder can provide the content of imported segments, CE 146 should be used to submit 
 the full work-package bundle. Otherwise it is the responsibility of the receiving guarantor to fetch 
@@ -464,7 +464,7 @@ Distribution of a fully guaranteed work-report ready for inclusion in a block.
 After sharing a work-package received via CE 133 and getting back a signature from another
 guarantor, a guaranteed work-report may be constructed. The third guarantor should be given a
 reasonable amount of time (e.g. two seconds) to produce an additional signature before the
-guaranteed work-report is distrubuted.
+guaranteed work-report is distributed.
 
 Guaranteed work-reports should be distributed to all current validators, and during the last core
 rotation of an epoch, additionally to all validators for the next epoch. Note that these validator
@@ -586,8 +586,8 @@ Node -> Assurer
 
 Request for a work-package bundle.
 
-This protocol should be used by auditors to request work-package bundle from guarantors
-for auditing. In case the guarantor fails to provide the valid bundle, the auditor should fall back to recovering the bundle with CE 138
+This protocol should be used by auditors to request work-package bundles from guarantors
+for auditing. In case the guarantor fails to provide the valid bundle, the auditor should fall back to recovering the bundle with CE 138.
 ```
 Auditor -> Guarantor
 
@@ -660,7 +660,7 @@ to complete work-package bundles.
 The number of segments requested in a single stream should not exceed $W_M$ ($W_M = 3072$,
 this constant is defined in the GP).
 
-If the guarantor fails to return the valid data, the requestor should fall back to using CE 139/140
+If the guarantor fails to return the valid data, the requestor should fall back to using CE 139/140.
 
 ```
 Segment Index = u16
@@ -705,7 +705,7 @@ introduce preimages, and by validators to gossip these preimages to other valida
 The recipient of the announcement is expected to follow up by requesting the preimage using
 protocol 143, provided the preimage has been requested on chain by the given service and the
 recipient is not already in possession of it. In the case where the sender of the announcement is a
-non-validator node, it is expected to keep the connection open for a reasonable time (eg 10
+non-validator node, it is expected to keep the connection open for a reasonable time (e.g. 10
 seconds) to allow this request to be made; if the connection is closed before the request can be
 made, the recipient is not expected to reopen it.
 
@@ -768,7 +768,7 @@ audit is derived. There are two kinds of announcements:
 Given the block being audited, the prior state and the signature, recipients of the
 announcement are able to verify the audit requirement claim. The tranche is not declared in the
 announcement. For a later tranche announcement, recipients should verify the signature and then
-derive the tranche from its VRF output ($C(\mathbf{r})$ in the GP).
+derive the tranche from its VRF output ($N(\mathbf{r})$ in the GP).
 
 Multiple announcements may be sent in a single message.
 
@@ -808,8 +808,8 @@ On receipt of a new negative judgment for a work-report that the node is respons
 - The node should audit the work-report, if it has not already done so, publishing its own judgment
   following this.
 
-A negative judgement should include the guarantees supporting the report. This is not needed for positive judgements.
-The guarantees is a bounded vector of at most 3 elements, preceded by the guarantees' slot.
+A negative judgment should include the guarantees supporting the report. This is not needed for positive judgments.
+The guarantees are a bounded vector of at most 3 elements, preceded by the guarantees' slot.
 
 Multiple judgments may be sent in a single message. Judgments from different auditors, work-reports
 and epochs may be batched together.
