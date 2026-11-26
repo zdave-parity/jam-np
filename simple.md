@@ -276,7 +276,6 @@ blocks, and:
 - If the given block is not known to the responding node, the stream should be reset/stopped. An
   empty response should only be sent for an ascending request where the given block is known but
   there are no headers to return.
-- The responding node need not hold the extrinsics of the blocks.
 
 The requesting node should verify that the response contains no more headers than the given
 maximum, and that they form a chain. For a descending request, the first header should have the
@@ -284,8 +283,10 @@ given hash, and each subsequent header should be the parent of the one before it
 request, the first header should be a child of the given block, and each subsequent header a child
 of the one before it. This does not imply that the headers, or their blocks, are valid.
 
-When the given block of an ascending request has several children, the choice of chain is left to
-the responding node; a descending request can be used to get a specific chain.
+When the given block of an ascending request has several children, the responding node should
+follow the chain leading to its best block, as defined in the GP. Where this does not determine the
+chain (for example, beyond the best block), the choice is left to the responding node. A descending
+request can be used to get a specific chain.
 
 If the stream is reset/stopped, the requesting node may fall back to using CE 128.
 
